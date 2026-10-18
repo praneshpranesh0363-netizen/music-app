@@ -192,6 +192,14 @@ def start_download():
     return jsonify({"task_id": task_id})
 
 
+@app.after_request
+def add_cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    return response
+
+
 @app.route("/api/progress/<task_id>")
 def get_progress(task_id):
     """Check download status and percentage."""
@@ -204,7 +212,23 @@ def serve_file(filename):
     """Serve a downloaded MP3 file."""
     filepath = os.path.join(DOWNLOAD_DIR, filename)
     if os.path.exists(filepath):
-        return send_file(filepath, as_attachment=True)
+        clean_name = filename.split("_", 1)[-1] if "_" in filename else filename
+        if not clean_name.lower().endswith(".mp3"):
+            clean_name += ".mp3"
+        try:
+            return send_file(
+                filepath,
+                as_attachment=True,
+                download_name=clean_name,
+                mimetype="audio/mpeg"
+            )
+        except TypeError:
+            return send_file(
+                filepath,
+                as_attachment=True,
+                attachment_filename=clean_name,
+                mimetype="audio/mpeg"
+            )
     return jsonify({"error": "File not found"}), 404
 
 
