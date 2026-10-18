@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MusicFlow - Ad-Free Music & Playlist Player</title>
+    <title>MusicFlow - Full Song Player & Downloader</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -23,7 +23,7 @@
             background: radial-gradient(circle at top left, #201747, #0d0b21 65%);
             min-height: 100vh;
             color: var(--text-main);
-            padding-bottom: 130px;
+            padding-bottom: 150px;
         }
 
         .container {
@@ -35,7 +35,7 @@
         /* Top Header */
         .header {
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 22px;
         }
         .header .badge {
             display: inline-block;
@@ -44,9 +44,10 @@
             padding: 5px 14px;
             border-radius: 20px;
             font-size: 0.82em;
-            font-weight: 600;
+            font-weight: 700;
             margin-bottom: 10px;
             border: 1px solid rgba(248, 87, 166, 0.3);
+            letter-spacing: 0.5px;
         }
         .header h1 {
             font-size: 2.5em;
@@ -61,12 +62,12 @@
             font-size: 0.98em;
         }
 
-        /* Main Nav Tabs */
+        /* Navigation Tabs */
         .nav-tabs {
             display: flex;
             justify-content: center;
             gap: 10px;
-            margin-bottom: 22px;
+            margin-bottom: 20px;
             flex-wrap: wrap;
         }
         .nav-btn {
@@ -153,7 +154,7 @@
             color: #fff;
         }
 
-        /* Separate Sections Headers */
+        /* Separate Section Headers */
         .section-header {
             display: flex;
             justify-content: space-between;
@@ -175,7 +176,7 @@
             color: var(--text-muted);
         }
 
-        /* Playlists / Albums Grid (Shown Separately) */
+        /* Separate Playlists Grid */
         .playlists-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
@@ -200,7 +201,7 @@
         }
         .playlist-thumb {
             width: 100%;
-            aspect-ratio: 1 / 1;
+            aspect-ratio: 16 / 9;
             border-radius: 10px;
             object-fit: cover;
             margin-bottom: 10px;
@@ -246,14 +247,14 @@
         }
         .playlist-detail-banner img {
             width: 110px;
-            height: 110px;
-            border-radius: 14px;
+            height: 80px;
+            border-radius: 12px;
             object-fit: cover;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
         }
         .playlist-detail-info { flex: 1; min-width: 0; }
-        .playlist-detail-title { font-size: 1.4em; font-weight: 800; margin-bottom: 4px; }
-        .playlist-detail-sub { color: var(--text-muted); font-size: 0.9em; margin-bottom: 12px; }
+        .playlist-detail-title { font-size: 1.3em; font-weight: 800; margin-bottom: 4px; }
+        .playlist-detail-sub { color: var(--text-muted); font-size: 0.88em; margin-bottom: 12px; }
         .banner-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
         .btn-play-all {
             padding: 9px 20px;
@@ -296,8 +297,8 @@
             border-color: rgba(248, 87, 166, 0.4);
         }
         .song-thumb {
-            width: 52px;
-            height: 52px;
+            width: 58px;
+            height: 58px;
             border-radius: 10px;
             object-fit: cover;
             background: #1b1836;
@@ -427,8 +428,8 @@
             margin: 0 auto;
         }
         .player-thumb {
-            width: 48px;
-            height: 48px;
+            width: 50px;
+            height: 50px;
             border-radius: 8px;
             object-fit: cover;
             background: #1b1836;
@@ -466,12 +467,12 @@
             cursor: pointer;
         }
         .ctrl-play {
-            width: 40px;
-            height: 40px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
             background: #fff;
             color: #110e28;
-            font-size: 1.1em;
+            font-size: 1.15em;
             border: none;
             cursor: pointer;
             display: flex;
@@ -480,9 +481,20 @@
         }
         .player-time {
             color: #8c92a8;
-            font-size: 0.8em;
+            font-size: 0.82em;
             flex-shrink: 0;
             font-variant-numeric: tabular-nums;
+        }
+
+        /* Hidden YouTube IFrame Audio Engine */
+        #yt-player-container {
+            position: fixed;
+            bottom: -9999px;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
+            opacity: 0.01;
+            pointer-events: none;
         }
 
         @media (max-width: 600px) {
@@ -492,14 +504,16 @@
             .player-time { display: none; }
         }
     </style>
+    <!-- YouTube IFrame API for 100% FULL SONG playback without cutoff -->
+    <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <div class="badge">100% AD-FREE &bull; PLAYLISTS &bull; MP3 DOWNLOADS</div>
+        <div class="badge">100% FULL-LENGTH SONGS &bull; AD-FREE &bull; MP3 DOWNLOADS</div>
         <h1>MusicFlow</h1>
-        <p>Search any song, view playlists separately, and download ad-free</p>
+        <p>Stream complete full songs, view playlists separately, and download audio</p>
     </div>
 
     <!-- Navigation Tabs -->
@@ -519,22 +533,22 @@
 
         <!-- Quick Tag Pills -->
         <div class="tags-row">
-            <div class="tag-pill" onclick="quickSearch('Aval')">&#127926; Aval</div>
-            <div class="tag-pill" onclick="quickSearch('Anirudh Ravichander')">&#127911; Anirudh Hits</div>
-            <div class="tag-pill" onclick="quickSearch('A.R. Rahman Hits')">&#9734; A.R. Rahman</div>
-            <div class="tag-pill" onclick="quickSearch('Tamil melody playlist')">&#128293; Tamil Melody</div>
+            <div class="tag-pill" onclick="quickSearch('Manithan Aval song')">&#127926; Aval (Full Song)</div>
+            <div class="tag-pill" onclick="quickSearch('Anirudh hits playlist')">&#127911; Anirudh Playlist</div>
+            <div class="tag-pill" onclick="quickSearch('A.R. Rahman classics')">&#9734; A.R. Rahman</div>
+            <div class="tag-pill" onclick="quickSearch('Tamil melody songs playlist')">&#128293; Tamil Melody</div>
             <div class="tag-pill" onclick="quickSearch('Hindi romantic songs')">&#128147; Hindi Romantic</div>
-            <div class="tag-pill" onclick="quickSearch('English pop hits')">&#10024; English Pop</div>
+            <div class="tag-pill" onclick="quickSearch('English pop hits playlist')">&#10024; English Pop</div>
             <div class="tag-pill" onclick="quickSearch('Lo-fi chill beats')">&#9749; Lo-Fi Beats</div>
         </div>
 
         <!-- PLAYLIST DETAIL VIEW (Shown when user clicks any playlist) -->
         <div id="playlistDetailContainer" style="display:none;"></div>
 
-        <!-- SEPARATE PLAYLISTS / ALBUMS SECTION -->
+        <!-- SEPARATE PLAYLISTS SECTION -->
         <div id="playlistsSection" style="display:none;">
             <div class="section-header">
-                <div class="section-title">&#128191; Playlists & Albums <span class="section-subtitle">(Click to open)</span></div>
+                <div class="section-title">&#128191; Playlists & Albums <span class="section-subtitle">(Shown Separately &bull; Click to open)</span></div>
                 <span id="playlistCount" class="section-subtitle"></span>
             </div>
             <div class="playlists-grid" id="playlistsGrid"></div>
@@ -543,13 +557,13 @@
         <!-- SEPARATE INDIVIDUAL SONGS SECTION -->
         <div id="songsSection">
             <div class="section-header" id="songsHeader" style="display:none;">
-                <div class="section-title">&#127925; Individual Songs</div>
+                <div class="section-title">&#127925; Individual Full Songs</div>
                 <span id="songsCount" class="section-subtitle"></span>
             </div>
             <div class="song-list" id="songsList">
                 <div class="empty-state">
                     <div class="icon">&#127925;</div>
-                    <p>Search any song or playlist above to start!</p>
+                    <p>Search any song or playlist above to start listening to the full track!</p>
                 </div>
             </div>
         </div>
@@ -566,7 +580,7 @@
     </div>
 </div>
 
-<!-- ==================== STICKY PLAYER ==================== -->
+<!-- ==================== FIXED BOTTOM MUSIC PLAYER ==================== -->
 <div class="player-bar" id="playerBar">
     <div class="player-progress-bar" id="progressBar" onclick="seekAudio(event)">
         <div class="player-progress-fill" id="progressFill"></div>
@@ -590,19 +604,81 @@
     </div>
 </div>
 
-<audio id="audioPlayer" preload="auto"></audio>
+<!-- Invisible YouTube Player for 100% Full-Length Songs -->
+<div id="yt-player-container">
+    <div id="yt-player"></div>
+</div>
 
 <script>
-    const audio = document.getElementById('audioPlayer');
+    let ytPlayer = null;
+    let isYtReady = false;
     let currentQueue = [];
     let currentIndex = -1;
     let isPlaying = false;
+    let progressTimer = null;
 
     // Load custom user playlists from localStorage
     let myPlaylists = JSON.parse(localStorage.getItem('my_music_playlists') || '{"Favorites": []}');
 
     function savePlaylists() {
         localStorage.setItem('my_music_playlists', JSON.stringify(myPlaylists));
+    }
+
+    // Initialize YouTube IFrame API
+    window.onYouTubeIframeAPIReady = function() {
+        ytPlayer = new YT.Player('yt-player', {
+            height: '200',
+            width: '200',
+            playerVars: {
+                'playsinline': 1,
+                'controls': 0,
+                'disablekb': 1,
+                'origin': window.location.origin
+            },
+            events: {
+                'onReady': () => { isYtReady = true; },
+                'onStateChange': onPlayerStateChange
+            }
+        });
+    };
+
+    function onPlayerStateChange(event) {
+        if (event.data === YT.PlayerState.PLAYING) {
+            isPlaying = true;
+            document.getElementById('playPauseBtn').innerHTML = '&#9646;&#9646;';
+            startProgressTracker();
+        } else if (event.data === YT.PlayerState.PAUSED) {
+            isPlaying = false;
+            document.getElementById('playPauseBtn').innerHTML = '&#9654;';
+            stopProgressTracker();
+        } else if (event.data === YT.PlayerState.ENDED) {
+            isPlaying = false;
+            document.getElementById('playPauseBtn').innerHTML = '&#9654;';
+            stopProgressTracker();
+            if (currentIndex < currentQueue.length - 1) {
+                nextSong();
+            }
+        }
+    }
+
+    function startProgressTracker() {
+        stopProgressTracker();
+        progressTimer = setInterval(() => {
+            if (!ytPlayer || !ytPlayer.getCurrentTime) return;
+            const current = ytPlayer.getCurrentTime() || 0;
+            const duration = ytPlayer.getDuration() || (currentQueue[currentIndex] ? currentQueue[currentIndex].duration : 0);
+
+            if (duration > 0) {
+                const percent = (current / duration) * 100;
+                document.getElementById('progressFill').style.width = percent + '%';
+                document.getElementById('currentTime').textContent = formatDuration(current);
+                document.getElementById('totalTime').textContent = formatDuration(duration);
+            }
+        }, 500);
+    }
+
+    function stopProgressTracker() {
+        if (progressTimer) clearInterval(progressTimer);
     }
 
     function switchMainTab(tab) {
@@ -625,7 +701,6 @@
         const query = document.getElementById('searchInput').value.trim();
         if (!query) return;
 
-        // Hide playlist detail if open
         closePlaylistDetail();
 
         const btn = document.getElementById('searchBtn');
@@ -636,50 +711,58 @@
 
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner"></span>';
-        songsList.innerHTML = '<div class="empty-state"><span class="spinner"></span><p style="margin-top:10px">Searching songs and playlists separately...</p></div>';
+        songsList.innerHTML = '<div class="empty-state"><span class="spinner"></span><p style="margin-top:10px">Searching full songs and playlists separately...</p></div>';
 
         try {
-            // Search BOTH: Songs and Albums/Playlists simultaneously
-            const [songsRes, albumsRes] = await Promise.all([
-                fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=25`).then(r => r.json()),
-                fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=album&limit=8`).then(r => r.json())
+            // Search Invidious for BOTH: Videos (Full Songs) and Playlists
+            const invidiousBase = 'https://invidious.f5.si';
+
+            const [songsRes, playlistsRes] = await Promise.all([
+                fetch(`${invidiousBase}/api/v1/search?q=${encodeURIComponent(query)}&type=video`).then(r => r.json()).catch(() => []),
+                fetch(`${invidiousBase}/api/v1/search?q=${encodeURIComponent(query + ' playlist')}&type=playlist`).then(r => r.json()).catch(() => [])
             ]);
 
-            const songs = songsRes.results || [];
-            const albums = albumsRes.results || [];
+            const songs = Array.isArray(songsRes) ? songsRes : [];
+            const playlists = Array.isArray(playlistsRes) ? playlistsRes : [];
 
-            // 1. RENDER SEPARATE PLAYLISTS / ALBUMS SECTION
-            if (albums.length > 0) {
+            // 1. RENDER SEPARATE PLAYLISTS SECTION
+            if (playlists.length > 0) {
                 playlistsSection.style.display = 'block';
-                document.getElementById('playlistCount').textContent = `${albums.length} collections`;
-                playlistsGrid.innerHTML = albums.map(a => `
-                    <div class="playlist-card" onclick="openPlaylistDetail('${a.collectionId}', '${escapeHtml(a.collectionName)}', '${escapeHtml(a.artistName)}', '${(a.artworkUrl100 || '').replace('100x100bb', '400x400bb')}')">
-                        <img class="playlist-thumb" src="${(a.artworkUrl100 || '').replace('100x100bb', '300x300bb')}" alt="${escapeHtml(a.collectionName)}">
-                        <div class="playlist-name">${escapeHtml(a.collectionName)}</div>
-                        <div class="playlist-author">${escapeHtml(a.artistName)}</div>
-                        <div class="playlist-tag">&#128191; ${a.trackCount || 0} Tracks</div>
-                    </div>
-                `).join('');
+                document.getElementById('playlistCount').textContent = `${playlists.length} playlists`;
+                playlistsGrid.innerHTML = playlists.slice(0, 8).map(pl => {
+                    const thumb = pl.playlistThumbnail || (pl.videos && pl.videos[0] ? `https://i.ytimg.com/vi/${pl.videos[0].videoId}/hqdefault.jpg` : '');
+                    return `
+                        <div class="playlist-card" onclick="openPlaylistDetail('${pl.playlistId}', '${escapeHtml(pl.title)}', '${escapeHtml(pl.author || 'Playlist')}', '${thumb}')">
+                            <img class="playlist-thumb" src="${thumb || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&h=200&fit=crop'}" alt="${escapeHtml(pl.title)}" onerror="this.src='https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&h=200&fit=crop'">
+                            <div class="playlist-name">${escapeHtml(pl.title)}</div>
+                            <div class="playlist-author">${escapeHtml(pl.author || 'Playlist')}</div>
+                            <div class="playlist-tag">&#128191; ${pl.videoCount || 'Collection'} Tracks</div>
+                        </div>
+                    `;
+                }).join('');
             } else {
                 playlistsSection.style.display = 'none';
             }
 
-            // 2. RENDER SEPARATE SONGS SECTION
+            // 2. RENDER SEPARATE FULL SONGS SECTION
             if (songs.length > 0) {
                 songsHeader.style.display = 'flex';
-                document.getElementById('songsCount').textContent = `${songs.length} tracks`;
-                currentQueue = songs.map(s => ({
-                    title: s.trackName || 'Unknown Title',
-                    artist: s.artistName || 'Unknown Artist',
-                    artwork: (s.artworkUrl100 || '').replace('100x100bb', '300x300bb'),
-                    streamUrl: s.previewUrl,
-                    duration: 30
-                }));
+                document.getElementById('songsCount').textContent = `${songs.length} full songs`;
+                currentQueue = songs.map(s => {
+                    const thumb = (s.videoThumbnails && s.videoThumbnails[0]) ? s.videoThumbnails[0].url : `https://i.ytimg.com/vi/${s.videoId}/hqdefault.jpg`;
+                    return {
+                        title: s.title || 'Unknown Title',
+                        artist: s.author || 'Unknown Artist',
+                        artwork: thumb,
+                        videoId: s.videoId,
+                        duration: s.lengthSeconds || 240
+                    };
+                });
 
                 songsList.innerHTML = currentQueue.map((s, i) => renderSongCard(s, i, 'search')).join('');
             } else {
                 songsHeader.style.display = 'none';
-                songsList.innerHTML = '<div class="empty-state"><div class="icon">&#128533;</div><p>No songs found for this search.</p></div>';
+                songsList.innerHTML = '<div class="empty-state"><div class="icon">&#128533;</div><p>No full songs found. Try another search query.</p></div>';
             }
 
         } catch (e) {
@@ -691,40 +774,42 @@
     }
 
     // OPEN A SPECIFIC PLAYLIST TO VIEW ITS TRACKS SEPARATELY
-    async function openPlaylistDetail(collectionId, name, artist, artwork) {
+    async function openPlaylistDetail(playlistId, name, author, artwork) {
         const container = document.getElementById('playlistDetailContainer');
         container.style.display = 'block';
-        container.innerHTML = '<div class="empty-state"><span class="spinner"></span><p>Loading playlist songs...</p></div>';
+        container.innerHTML = '<div class="empty-state"><span class="spinner"></span><p>Loading full songs in playlist...</p></div>';
 
-        // Scroll to top
         window.scrollTo({ top: 120, behavior: 'smooth' });
 
         try {
-            const res = await fetch(`https://itunes.apple.com/lookup?id=${collectionId}&entity=song`).then(r => r.json());
-            const tracks = (res.results || []).filter(item => item.wrapperType === 'track');
+            const res = await fetch(`https://invidious.f5.si/api/v1/playlists/${playlistId}`).then(r => r.json());
+            const videos = res.videos || [];
 
-            const playlistTracks = tracks.map(t => ({
-                title: t.trackName || 'Unknown Title',
-                artist: t.artistName || artist,
-                artwork: artwork || (t.artworkUrl100 || '').replace('100x100bb', '300x300bb'),
-                streamUrl: t.previewUrl,
-                duration: 30
-            }));
+            const playlistTracks = videos.map(v => {
+                const thumb = (v.videoThumbnails && v.videoThumbnails[0]) ? v.videoThumbnails[0].url : `https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`;
+                return {
+                    title: v.title || 'Unknown Title',
+                    artist: v.author || author,
+                    artwork: thumb,
+                    videoId: v.videoId,
+                    duration: v.lengthSeconds || 240
+                };
+            });
 
             container.innerHTML = `
                 <div class="playlist-detail-banner">
                     <img src="${artwork}" alt="${name}">
                     <div class="playlist-detail-info">
                         <div class="playlist-detail-title">${name}</div>
-                        <div class="playlist-detail-sub">${artist} &bull; ${playlistTracks.length} Songs</div>
+                        <div class="playlist-detail-sub">${author} &bull; ${playlistTracks.length} Full Songs</div>
                         <div class="banner-buttons">
-                            <button class="btn-play-all" onclick="playAllPlaylist(${JSON.stringify(playlistTracks).replace(/"/g, '&quot;')})">&#9654; Play All</button>
+                            <button class="btn-play-all" onclick="playAllPlaylist(${JSON.stringify(playlistTracks).replace(/"/g, '&quot;')})">&#9654; Play All (${playlistTracks.length})</button>
                             <button class="btn-back" onclick="closePlaylistDetail()">&#8592; Back to Results</button>
                         </div>
                     </div>
                 </div>
                 <div class="section-header">
-                    <div class="section-title">&#127926; Songs in this Playlist</div>
+                    <div class="section-title">&#127926; Full Songs in this Playlist</div>
                 </div>
                 <div class="song-list">
                     ${playlistTracks.map((s, i) => renderSongCard(s, i, 'playlist', playlistTracks)).join('')}
@@ -752,15 +837,15 @@
         return `
             <div class="song-card" id="card-${context}-${index}">
                 <img class="song-thumb" src="${song.artwork}" alt="${escapeHtml(song.title)}"
-                     onerror="this.style.background='#221e42'">
+                     onerror="this.src='https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&h=100&fit=crop'">
                 <div class="song-info">
                     <div class="song-title">${escapeHtml(song.title)}</div>
-                    <div class="song-artist">${escapeHtml(song.artist)}</div>
+                    <div class="song-artist">${escapeHtml(song.artist)} &bull; ${formatDuration(song.duration)} (Full Song)</div>
                 </div>
                 <div class="actions-group">
-                    <button class="btn-play" onclick='handlePlayClick(${index}, ${customList ? JSON.stringify(customList).replace(/'/g, "\\'") : "null"})' title="Play">&#9654;</button>
+                    <button class="btn-play" onclick='handlePlayClick(${index}, ${customList ? JSON.stringify(customList).replace(/'/g, "\\'") : "null"})' title="Play Full Song">&#9654;</button>
                     <button class="btn-add-pl" onclick='promptAddToPlaylist(${JSON.stringify(song).replace(/'/g, "\\'")})' title="Add to Playlist">+</button>
-                    <a class="btn-download" href="${song.streamUrl}" download="${escapeHtml(song.title)}.m4a" target="_blank">&#11015; MP3</a>
+                    <a class="btn-download" href="https://loader.to/api/card/?url=https://www.youtube.com/watch?v=${song.videoId}" target="_blank" title="Download Full MP3">&#11015; MP3</a>
                 </div>
             </div>
         `;
@@ -773,7 +858,7 @@
 
     function playSong(index) {
         const song = currentQueue[index];
-        if (!song || !song.streamUrl) return;
+        if (!song || !song.videoId) return;
 
         currentIndex = index;
 
@@ -783,21 +868,32 @@
         document.getElementById('playerTitle').textContent = song.title;
         document.getElementById('playerArtist').textContent = song.artist;
         document.getElementById('playerThumb').src = song.artwork;
+        document.getElementById('totalTime').textContent = formatDuration(song.duration);
 
-        audio.src = song.streamUrl;
-        audio.play().catch(e => console.log('Audio autoplay prevented:', e));
+        if (ytPlayer && ytPlayer.loadVideoById) {
+            ytPlayer.loadVideoById(song.videoId);
+            ytPlayer.playVideo();
+        } else {
+            // If API still initializing, create iframe fallback
+            const iframe = document.getElementById('yt-player');
+            if (iframe) {
+                iframe.src = `https://www.youtube.com/embed/${song.videoId}?autoplay=1&enablejsapi=1`;
+            }
+        }
+
         isPlaying = true;
         document.getElementById('playPauseBtn').innerHTML = '&#9646;&#9646;';
+        startProgressTracker();
     }
 
     function togglePlayPause() {
-        if (!audio.src) return;
+        if (!ytPlayer) return;
         if (isPlaying) {
-            audio.pause();
+            ytPlayer.pauseVideo();
             isPlaying = false;
             document.getElementById('playPauseBtn').innerHTML = '&#9654;';
         } else {
-            audio.play();
+            ytPlayer.playVideo();
             isPlaying = true;
             document.getElementById('playPauseBtn').innerHTML = '&#9646;&#9646;';
         }
@@ -812,26 +908,14 @@
     }
 
     function seekAudio(e) {
-        if (!audio.duration) return;
+        if (!ytPlayer || !ytPlayer.getDuration) return;
         const bar = document.getElementById('progressBar');
         const rect = bar.getBoundingClientRect();
         const percent = (e.clientX - rect.left) / rect.width;
-        audio.currentTime = percent * audio.duration;
+        const duration = ytPlayer.getDuration() || (currentQueue[currentIndex] ? currentQueue[currentIndex].duration : 0);
+        const seekToTime = percent * duration;
+        ytPlayer.seekTo(seekToTime, true);
     }
-
-    audio.addEventListener('timeupdate', () => {
-        if (!audio.duration) return;
-        const percent = (audio.currentTime / audio.duration) * 100;
-        document.getElementById('progressFill').style.width = percent + '%';
-        document.getElementById('currentTime').textContent = formatDuration(Math.floor(audio.currentTime));
-        document.getElementById('totalTime').textContent = formatDuration(Math.floor(audio.duration));
-    });
-
-    audio.addEventListener('ended', () => {
-        isPlaying = false;
-        document.getElementById('playPauseBtn').innerHTML = '&#9654;';
-        if (currentIndex < currentQueue.length - 1) nextSong();
-    });
 
     // ==================== USER CUSTOM PLAYLISTS ====================
     function promptAddToPlaylist(song) {
@@ -841,14 +925,13 @@
             return;
         }
 
-        const choice = prompt(`Add "${song.title}" to which playlist?\n\nAvailable:\n` + names.map((n, i) => `${i + 1}. ${n}`).join('\n') + `\n\nType the playlist name:`, names[0]);
+        const choice = prompt(`Add "${song.title}" to which playlist?\n\nAvailable Playlists:\n` + names.map((n, i) => `${i + 1}. ${n}`).join('\n') + `\n\nType playlist name:`, names[0]);
         if (!choice) return;
 
         const target = choice.trim();
         if (!myPlaylists[target]) myPlaylists[target] = [];
 
-        // Check duplicate
-        if (!myPlaylists[target].some(s => s.title === song.title && s.artist === song.artist)) {
+        if (!myPlaylists[target].some(s => s.videoId === song.videoId)) {
             myPlaylists[target].push(song);
             savePlaylists();
             alert(`Added to "${target}"!`);
@@ -886,7 +969,7 @@
                 <div class="playlist-card" onclick="viewMyPlaylist('${escapeHtml(name)}')">
                     <img class="playlist-thumb" src="${cover}" alt="${escapeHtml(name)}">
                     <div class="playlist-name">${escapeHtml(name)}</div>
-                    <div class="playlist-author">${songs.length} Songs</div>
+                    <div class="playlist-author">${songs.length} Full Songs</div>
                     <div class="playlist-tag">&#9835; My Playlist</div>
                 </div>
             `;
@@ -904,7 +987,7 @@
 
         container.innerHTML = `
             <div class="section-header" style="margin-top:20px;">
-                <div class="section-title">&#128194; ${name} (${songs.length} Songs)</div>
+                <div class="section-title">&#128194; ${name} (${songs.length} Full Songs)</div>
                 <button class="btn-play-all" onclick='playAllPlaylist(${JSON.stringify(songs).replace(/'/g, "\\'")})'>&#9654; Play All</button>
             </div>
             <div class="song-list">
@@ -927,9 +1010,9 @@
         return div.innerHTML;
     }
 
-    // Auto-load on open
+    // Auto-search default on load
     window.addEventListener('DOMContentLoaded', () => {
-        quickSearch('Aval');
+        quickSearch('Manithan Aval song');
     });
 </script>
 
