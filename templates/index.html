@@ -633,7 +633,7 @@
 
 <div class="container">
     <div class="header">
-        <div class="badge">100% AD-FREE &bull; LINE-BY-LINE PLAYLISTS &bull; DIRECT DEVICE DOWNLOADS</div>
+        <div class="badge">100% AD-FREE &bull; LINE-BY-LINE PLAYLISTS &bull; DIRECT MP3 DOWNLOADS &bull; v3.2</div>
         <h1>MusicFlow</h1>
         <p>Zero ads, full songs, and direct downloads to your mobile or desktop file manager</p>
     </div>
@@ -796,15 +796,65 @@
         });
     };
 
+    let adShieldTimer = null;
+    let isAdMuted = false;
+
+    function startAdShield() {
+        stopAdShield();
+        adShieldTimer = setInterval(() => {
+            if (!isYtFallback || !ytPlayer || !ytPlayer.getPlayerState) return;
+            try {
+                const isAdState = (ytPlayer.getAdState && ytPlayer.getAdState() > 0);
+                const currentDur = ytPlayer.getDuration ? ytPlayer.getDuration() : 0;
+                const expectedDur = currentQueue[currentIndex] ? currentQueue[currentIndex].duration : 0;
+                const currentSec = ytPlayer.getCurrentTime ? ytPlayer.getCurrentTime() : 0;
+
+                const isShortAdDuration = (expectedDur > 60 && currentDur > 0 && currentDur <= 35);
+
+                if (isAdState || isShortAdDuration) {
+                    if (!isAdMuted) {
+                        ytPlayer.mute();
+                        isAdMuted = true;
+                        showToast('🛡️ Ad Blocked & Skipped');
+                    }
+                    ytPlayer.setPlaybackRate(16);
+                    ytPlayer.seekTo(currentDur + 1, true);
+                } else {
+                    if (isAdMuted) {
+                        ytPlayer.unMute();
+                        ytPlayer.setPlaybackRate(1);
+                        isAdMuted = false;
+                    }
+                    if (currentDur > 0) {
+                        const percent = (currentSec / currentDur) * 100;
+                        document.getElementById('progressFill').style.width = percent + '%';
+                        document.getElementById('currentTime').textContent = formatDuration(currentSec);
+                        document.getElementById('totalTime').textContent = formatDuration(currentDur);
+                    }
+                }
+            } catch (err) {}
+        }, 80);
+    }
+
+    function stopAdShield() {
+        if (adShieldTimer) {
+            clearInterval(adShieldTimer);
+            adShieldTimer = null;
+        }
+    }
+
     function onYtStateChange(event) {
         if (!isYtFallback) return;
         if (event.data === YT.PlayerState.PLAYING) {
             isPlaying = true;
             document.getElementById('playPauseBtn').innerHTML = '&#9646;&#9646;';
+            startAdShield();
         } else if (event.data === YT.PlayerState.PAUSED) {
             isPlaying = false;
             document.getElementById('playPauseBtn').innerHTML = '&#9654;';
+            stopAdShield();
         } else if (event.data === YT.PlayerState.ENDED) {
+            stopAdShield();
             if (isRepeat) playSong(currentIndex);
             else if (isShuffle) playSong(Math.floor(Math.random() * currentQueue.length));
             else if (currentIndex < currentQueue.length - 1) nextSong();
@@ -1081,6 +1131,7 @@
             if (ytPlayer && ytPlayer.loadVideoById) {
                 ytPlayer.loadVideoById(song.videoId);
                 ytPlayer.playVideo();
+                startAdShield();
                 isPlaying = true;
                 document.getElementById('playPauseBtn').innerHTML = '&#9646;&#9646;';
             }
@@ -1115,10 +1166,12 @@
             if (isPlaying) {
                 ytPlayer.pauseVideo();
                 isPlaying = false;
+                stopAdShield();
                 document.getElementById('playPauseBtn').innerHTML = '&#9654;';
             } else {
                 ytPlayer.playVideo();
                 isPlaying = true;
+                startAdShield();
                 document.getElementById('playPauseBtn').innerHTML = '&#9646;&#9646;';
             }
             return;
