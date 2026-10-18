@@ -1,0 +1,4 @@
+C:/Program Files/Git/ucrt64/bin/git-credential-manager.exe store: line 1: C:/Program: No such file or directory
+To https://github.com/praneshpranesh0363-netizen/music-app.git
+ * [new branch]      main -> main
+branch 'main' set up to track 'origin/main'.

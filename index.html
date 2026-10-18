@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MusicFlow - Ad-Free Music Player & Downloader</title>
+    <title>MusicFlow - Ad-Free Music & Playlist Player</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -29,13 +29,13 @@
         .container {
             max-width: 980px;
             margin: 0 auto;
-            padding: 30px 18px;
+            padding: 25px 18px;
         }
 
         /* Top Header */
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
         .header .badge {
             display: inline-block;
@@ -45,11 +45,11 @@
             border-radius: 20px;
             font-size: 0.82em;
             font-weight: 600;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             border: 1px solid rgba(248, 87, 166, 0.3);
         }
         .header h1 {
-            font-size: 2.6em;
+            font-size: 2.5em;
             font-weight: 800;
             background: linear-gradient(90deg, #ff719a, #ff9068, #fcd000);
             -webkit-background-clip: text;
@@ -58,14 +58,40 @@
         }
         .header p {
             color: var(--text-muted);
-            font-size: 1em;
+            font-size: 0.98em;
+        }
+
+        /* Main Nav Tabs */
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 22px;
+            flex-wrap: wrap;
+        }
+        .nav-btn {
+            padding: 10px 22px;
+            border: 1px solid var(--card-border);
+            border-radius: 30px;
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.92em;
+            font-weight: 600;
+            transition: all 0.25s ease;
+        }
+        .nav-btn.active {
+            background: linear-gradient(135deg, rgba(248, 87, 166, 0.25), rgba(255, 88, 88, 0.25));
+            border-color: rgba(248, 87, 166, 0.6);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(248, 87, 166, 0.2);
         }
 
         /* Search Section */
         .search-container {
             display: flex;
             gap: 10px;
-            margin-bottom: 18px;
+            margin-bottom: 15px;
         }
         .search-input {
             flex: 1;
@@ -106,8 +132,8 @@
             display: flex;
             gap: 8px;
             overflow-x: auto;
-            padding-bottom: 12px;
-            margin-bottom: 22px;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
             scrollbar-width: none;
         }
         .tags-row::-webkit-scrollbar { display: none; }
@@ -125,6 +151,128 @@
         .tag-pill:hover {
             background: rgba(255, 255, 255, 0.12);
             color: #fff;
+        }
+
+        /* Separate Sections Headers */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 22px 0 12px 0;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .section-title {
+            font-size: 1.15em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #fff;
+        }
+        .section-subtitle {
+            font-size: 0.82em;
+            color: var(--text-muted);
+        }
+
+        /* Playlists / Albums Grid (Shown Separately) */
+        .playlists-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 14px;
+            margin-bottom: 25px;
+        }
+        .playlist-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .playlist-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-4px);
+            border-color: rgba(248, 87, 166, 0.4);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        .playlist-thumb {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 10px;
+            object-fit: cover;
+            margin-bottom: 10px;
+            background: #1e1a3d;
+        }
+        .playlist-name {
+            font-size: 0.92em;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #fff;
+            margin-bottom: 3px;
+        }
+        .playlist-author {
+            font-size: 0.78em;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .playlist-tag {
+            margin-top: 8px;
+            display: inline-block;
+            background: rgba(102, 126, 234, 0.2);
+            color: #8da2fb;
+            font-size: 0.72em;
+            padding: 2px 8px;
+            border-radius: 10px;
+            align-self: flex-start;
+        }
+
+        /* Playlist Detail Banner View */
+        .playlist-detail-banner {
+            background: linear-gradient(135deg, rgba(248, 87, 166, 0.15), rgba(102, 126, 234, 0.15));
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 18px;
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 22px;
+        }
+        .playlist-detail-banner img {
+            width: 110px;
+            height: 110px;
+            border-radius: 14px;
+            object-fit: cover;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+        .playlist-detail-info { flex: 1; min-width: 0; }
+        .playlist-detail-title { font-size: 1.4em; font-weight: 800; margin-bottom: 4px; }
+        .playlist-detail-sub { color: var(--text-muted); font-size: 0.9em; margin-bottom: 12px; }
+        .banner-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn-play-all {
+            padding: 9px 20px;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.9em;
+            cursor: pointer;
+        }
+        .btn-back {
+            padding: 9px 18px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            font-size: 0.88em;
+            cursor: pointer;
         }
 
         /* Song Card List */
@@ -148,8 +296,8 @@
             border-color: rgba(248, 87, 166, 0.4);
         }
         .song-thumb {
-            width: 54px;
-            height: 54px;
+            width: 52px;
+            height: 52px;
             border-radius: 10px;
             object-fit: cover;
             background: #1b1836;
@@ -161,8 +309,8 @@
         }
         .song-title {
             font-weight: 600;
-            font-size: 0.98em;
-            margin-bottom: 4px;
+            font-size: 0.96em;
+            margin-bottom: 3px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -170,7 +318,7 @@
         }
         .song-artist {
             color: var(--text-muted);
-            font-size: 0.85em;
+            font-size: 0.83em;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -182,13 +330,13 @@
             flex-shrink: 0;
         }
         .btn-play {
-            width: 40px;
-            height: 40px;
+            width: 38px;
+            height: 38px;
             border: none;
             border-radius: 50%;
             background: linear-gradient(135deg, #11998e, #38ef7d);
             color: #fff;
-            font-size: 1.1em;
+            font-size: 1.05em;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -196,13 +344,27 @@
             transition: transform 0.2s;
         }
         .btn-play:hover { transform: scale(1.1); }
+        .btn-add-pl {
+            width: 34px;
+            height: 34px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+            font-size: 1.1em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-add-pl:hover { background: rgba(248, 87, 166, 0.2); border-color: #f857a6; }
         .btn-download {
-            padding: 8px 16px;
+            padding: 8px 14px;
             border: none;
             border-radius: 20px;
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: #fff;
-            font-size: 0.85em;
+            font-size: 0.82em;
             font-weight: 600;
             cursor: pointer;
             text-decoration: none;
@@ -214,7 +376,7 @@
         /* Empty states & spinner */
         .empty-state {
             text-align: center;
-            padding: 50px 20px;
+            padding: 40px 20px;
             color: #6c728a;
         }
         .empty-state .icon { font-size: 2.8em; margin-bottom: 10px; }
@@ -325,9 +487,8 @@
 
         @media (max-width: 600px) {
             .header h1 { font-size: 2em; }
-            .song-card { flex-direction: column; text-align: center; }
-            .song-info { width: 100%; }
-            .actions-group { justify-content: center; }
+            .playlist-detail-banner { flex-direction: column; text-align: center; }
+            .actions-group { gap: 6px; }
             .player-time { display: none; }
         }
     </style>
@@ -336,36 +497,72 @@
 
 <div class="container">
     <div class="header">
-        <div class="badge">100% AD-FREE &bull; MP3 DOWNLOADS</div>
+        <div class="badge">100% AD-FREE &bull; PLAYLISTS &bull; MP3 DOWNLOADS</div>
         <h1>MusicFlow</h1>
-        <p>Search any song in the world, stream without ads, and download in one click</p>
+        <p>Search any song, view playlists separately, and download ad-free</p>
     </div>
 
-    <!-- Search Box -->
-    <div class="search-container">
-        <input type="text" id="searchInput" class="search-input"
-               placeholder="Search song, artist, movie or album..."
-               onkeypress="if(event.key==='Enter') searchSongs()">
-        <button class="search-submit" id="searchBtn" onclick="searchSongs()">Search</button>
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+        <button class="nav-btn active" id="tabSearchBtn" onclick="switchMainTab('search')">&#128269; Explore & Search</button>
+        <button class="nav-btn" id="tabMyPlaylistsBtn" onclick="switchMainTab('myplaylists')">&#128194; My Saved Playlists</button>
     </div>
 
-    <!-- Quick Genre Pills -->
-    <div class="tags-row">
-        <div class="tag-pill" onclick="quickSearch('Aval')">&#127926; Aval</div>
-        <div class="tag-pill" onclick="quickSearch('Anirudh Ravichander')">&#127911; Anirudh Hits</div>
-        <div class="tag-pill" onclick="quickSearch('A.R. Rahman')">&#9734; A.R. Rahman</div>
-        <div class="tag-pill" onclick="quickSearch('Tamil melody songs')">&#128293; Tamil Melody</div>
-        <div class="tag-pill" onclick="quickSearch('Hindi romantic')">&#128147; Hindi Romantic</div>
-        <div class="tag-pill" onclick="quickSearch('English pop hits')">&#10024; English Pop</div>
-        <div class="tag-pill" onclick="quickSearch('Lo-fi chill beats')">&#9749; Lo-Fi Beats</div>
-    </div>
-
-    <!-- Results List -->
-    <div class="song-list" id="searchResults">
-        <div class="empty-state">
-            <div class="icon">&#127925;</div>
-            <p>Type any song name above to start playing!</p>
+    <!-- SEARCH VIEW -->
+    <div id="searchView">
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input"
+                   placeholder="Search song, playlist, album, or artist..."
+                   onkeypress="if(event.key==='Enter') performSearch()">
+            <button class="search-submit" id="searchBtn" onclick="performSearch()">Search</button>
         </div>
+
+        <!-- Quick Tag Pills -->
+        <div class="tags-row">
+            <div class="tag-pill" onclick="quickSearch('Aval')">&#127926; Aval</div>
+            <div class="tag-pill" onclick="quickSearch('Anirudh Ravichander')">&#127911; Anirudh Hits</div>
+            <div class="tag-pill" onclick="quickSearch('A.R. Rahman Hits')">&#9734; A.R. Rahman</div>
+            <div class="tag-pill" onclick="quickSearch('Tamil melody playlist')">&#128293; Tamil Melody</div>
+            <div class="tag-pill" onclick="quickSearch('Hindi romantic songs')">&#128147; Hindi Romantic</div>
+            <div class="tag-pill" onclick="quickSearch('English pop hits')">&#10024; English Pop</div>
+            <div class="tag-pill" onclick="quickSearch('Lo-fi chill beats')">&#9749; Lo-Fi Beats</div>
+        </div>
+
+        <!-- PLAYLIST DETAIL VIEW (Shown when user clicks any playlist) -->
+        <div id="playlistDetailContainer" style="display:none;"></div>
+
+        <!-- SEPARATE PLAYLISTS / ALBUMS SECTION -->
+        <div id="playlistsSection" style="display:none;">
+            <div class="section-header">
+                <div class="section-title">&#128191; Playlists & Albums <span class="section-subtitle">(Click to open)</span></div>
+                <span id="playlistCount" class="section-subtitle"></span>
+            </div>
+            <div class="playlists-grid" id="playlistsGrid"></div>
+        </div>
+
+        <!-- SEPARATE INDIVIDUAL SONGS SECTION -->
+        <div id="songsSection">
+            <div class="section-header" id="songsHeader" style="display:none;">
+                <div class="section-title">&#127925; Individual Songs</div>
+                <span id="songsCount" class="section-subtitle"></span>
+            </div>
+            <div class="song-list" id="songsList">
+                <div class="empty-state">
+                    <div class="icon">&#127925;</div>
+                    <p>Search any song or playlist above to start!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MY SAVED PLAYLISTS VIEW -->
+    <div id="myPlaylistsView" style="display:none;">
+        <div class="section-header">
+            <div class="section-title">&#128194; My Created Playlists</div>
+            <button class="btn-play-all" onclick="createNewPlaylistPrompt()">+ New Playlist</button>
+        </div>
+        <div class="playlists-grid" id="myPlaylistsGrid"></div>
+        <div class="song-list" id="myPlaylistSongsList"></div>
     </div>
 </div>
 
@@ -397,76 +594,190 @@
 
 <script>
     const audio = document.getElementById('audioPlayer');
-    let playlist = [];
+    let currentQueue = [];
     let currentIndex = -1;
     let isPlaying = false;
 
-    function quickSearch(query) {
-        document.getElementById('searchInput').value = query;
-        searchSongs();
+    // Load custom user playlists from localStorage
+    let myPlaylists = JSON.parse(localStorage.getItem('my_music_playlists') || '{"Favorites": []}');
+
+    function savePlaylists() {
+        localStorage.setItem('my_music_playlists', JSON.stringify(myPlaylists));
     }
 
-    async function searchSongs() {
+    function switchMainTab(tab) {
+        document.getElementById('tabSearchBtn').classList.toggle('active', tab === 'search');
+        document.getElementById('tabMyPlaylistsBtn').classList.toggle('active', tab === 'myplaylists');
+        document.getElementById('searchView').style.display = tab === 'search' ? 'block' : 'none';
+        document.getElementById('myPlaylistsView').style.display = tab === 'myplaylists' ? 'block' : 'none';
+
+        if (tab === 'myplaylists') {
+            renderMyPlaylists();
+        }
+    }
+
+    function quickSearch(query) {
+        document.getElementById('searchInput').value = query;
+        performSearch();
+    }
+
+    async function performSearch() {
         const query = document.getElementById('searchInput').value.trim();
         if (!query) return;
 
+        // Hide playlist detail if open
+        closePlaylistDetail();
+
         const btn = document.getElementById('searchBtn');
-        const container = document.getElementById('searchResults');
+        const songsList = document.getElementById('songsList');
+        const playlistsGrid = document.getElementById('playlistsGrid');
+        const playlistsSection = document.getElementById('playlistsSection');
+        const songsHeader = document.getElementById('songsHeader');
+
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner"></span>';
-        container.innerHTML = '<div class="empty-state"><span class="spinner"></span><p style="margin-top:10px">Searching millions of songs...</p></div>';
+        songsList.innerHTML = '<div class="empty-state"><span class="spinner"></span><p style="margin-top:10px">Searching songs and playlists separately...</p></div>';
 
         try {
-            // First try Apple / iTunes public search (global, ad-free, 100% CORS enabled on all devices)
-            const itunesUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=25`;
-            const resp = await fetch(itunesUrl);
-            const data = await resp.json();
+            // Search BOTH: Songs and Albums/Playlists simultaneously
+            const [songsRes, albumsRes] = await Promise.all([
+                fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=25`).then(r => r.json()),
+                fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=album&limit=8`).then(r => r.json())
+            ]);
 
-            if (!data.results || data.results.length === 0) {
-                container.innerHTML = '<div class="empty-state"><div class="icon">&#128533;</div><p>No songs found. Try another search.</p></div>';
-                return;
+            const songs = songsRes.results || [];
+            const albums = albumsRes.results || [];
+
+            // 1. RENDER SEPARATE PLAYLISTS / ALBUMS SECTION
+            if (albums.length > 0) {
+                playlistsSection.style.display = 'block';
+                document.getElementById('playlistCount').textContent = `${albums.length} collections`;
+                playlistsGrid.innerHTML = albums.map(a => `
+                    <div class="playlist-card" onclick="openPlaylistDetail('${a.collectionId}', '${escapeHtml(a.collectionName)}', '${escapeHtml(a.artistName)}', '${(a.artworkUrl100 || '').replace('100x100bb', '400x400bb')}')">
+                        <img class="playlist-thumb" src="${(a.artworkUrl100 || '').replace('100x100bb', '300x300bb')}" alt="${escapeHtml(a.collectionName)}">
+                        <div class="playlist-name">${escapeHtml(a.collectionName)}</div>
+                        <div class="playlist-author">${escapeHtml(a.artistName)}</div>
+                        <div class="playlist-tag">&#128191; ${a.trackCount || 0} Tracks</div>
+                    </div>
+                `).join('');
+            } else {
+                playlistsSection.style.display = 'none';
             }
 
-            playlist = data.results.map(item => ({
-                title: item.trackName || item.collectionName || 'Unknown Title',
-                artist: item.artistName || 'Unknown Artist',
-                artwork: (item.artworkUrl100 || '').replace('100x100bb', '300x300bb'),
-                streamUrl: item.previewUrl,
-                duration: 30
-            }));
+            // 2. RENDER SEPARATE SONGS SECTION
+            if (songs.length > 0) {
+                songsHeader.style.display = 'flex';
+                document.getElementById('songsCount').textContent = `${songs.length} tracks`;
+                currentQueue = songs.map(s => ({
+                    title: s.trackName || 'Unknown Title',
+                    artist: s.artistName || 'Unknown Artist',
+                    artwork: (s.artworkUrl100 || '').replace('100x100bb', '300x300bb'),
+                    streamUrl: s.previewUrl,
+                    duration: 30
+                }));
 
-            container.innerHTML = playlist.map((song, i) => `
-                <div class="song-card" id="card-${i}">
-                    <img class="song-thumb" src="${song.artwork}" alt="${escapeHtml(song.title)}"
-                         onerror="this.style.background='#252147'">
-                    <div class="song-info">
-                        <div class="song-title">${escapeHtml(song.title)}</div>
-                        <div class="song-artist">${escapeHtml(song.artist)}</div>
-                    </div>
-                    <div class="actions-group">
-                        <button class="btn-play" onclick="playSong(${i})" title="Play Ad-Free">&#9654;</button>
-                        <a class="btn-download" href="${song.streamUrl}" download="${escapeHtml(song.title)}.m4a" target="_blank" title="Download Audio">&#11015; Download</a>
-                    </div>
-                </div>
-            `).join('');
+                songsList.innerHTML = currentQueue.map((s, i) => renderSongCard(s, i, 'search')).join('');
+            } else {
+                songsHeader.style.display = 'none';
+                songsList.innerHTML = '<div class="empty-state"><div class="icon">&#128533;</div><p>No songs found for this search.</p></div>';
+            }
 
         } catch (e) {
-            container.innerHTML = `<div class="empty-state">&#10060; Error loading songs: ${escapeHtml(e.message)}</div>`;
+            songsList.innerHTML = `<div class="empty-state">&#10060; Error: ${escapeHtml(e.message)}</div>`;
         } finally {
             btn.disabled = false;
             btn.textContent = 'Search';
         }
     }
 
+    // OPEN A SPECIFIC PLAYLIST TO VIEW ITS TRACKS SEPARATELY
+    async function openPlaylistDetail(collectionId, name, artist, artwork) {
+        const container = document.getElementById('playlistDetailContainer');
+        container.style.display = 'block';
+        container.innerHTML = '<div class="empty-state"><span class="spinner"></span><p>Loading playlist songs...</p></div>';
+
+        // Scroll to top
+        window.scrollTo({ top: 120, behavior: 'smooth' });
+
+        try {
+            const res = await fetch(`https://itunes.apple.com/lookup?id=${collectionId}&entity=song`).then(r => r.json());
+            const tracks = (res.results || []).filter(item => item.wrapperType === 'track');
+
+            const playlistTracks = tracks.map(t => ({
+                title: t.trackName || 'Unknown Title',
+                artist: t.artistName || artist,
+                artwork: artwork || (t.artworkUrl100 || '').replace('100x100bb', '300x300bb'),
+                streamUrl: t.previewUrl,
+                duration: 30
+            }));
+
+            container.innerHTML = `
+                <div class="playlist-detail-banner">
+                    <img src="${artwork}" alt="${name}">
+                    <div class="playlist-detail-info">
+                        <div class="playlist-detail-title">${name}</div>
+                        <div class="playlist-detail-sub">${artist} &bull; ${playlistTracks.length} Songs</div>
+                        <div class="banner-buttons">
+                            <button class="btn-play-all" onclick="playAllPlaylist(${JSON.stringify(playlistTracks).replace(/"/g, '&quot;')})">&#9654; Play All</button>
+                            <button class="btn-back" onclick="closePlaylistDetail()">&#8592; Back to Results</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="section-header">
+                    <div class="section-title">&#127926; Songs in this Playlist</div>
+                </div>
+                <div class="song-list">
+                    ${playlistTracks.map((s, i) => renderSongCard(s, i, 'playlist', playlistTracks)).join('')}
+                </div>
+            `;
+
+        } catch (e) {
+            container.innerHTML = `<div class="empty-state">Failed to load playlist: ${e.message}</div>`;
+        }
+    }
+
+    function closePlaylistDetail() {
+        const container = document.getElementById('playlistDetailContainer');
+        container.style.display = 'none';
+        container.innerHTML = '';
+    }
+
+    function playAllPlaylist(tracks) {
+        if (!tracks || tracks.length === 0) return;
+        currentQueue = tracks;
+        playSong(0);
+    }
+
+    function renderSongCard(song, index, context = 'search', customList = null) {
+        return `
+            <div class="song-card" id="card-${context}-${index}">
+                <img class="song-thumb" src="${song.artwork}" alt="${escapeHtml(song.title)}"
+                     onerror="this.style.background='#221e42'">
+                <div class="song-info">
+                    <div class="song-title">${escapeHtml(song.title)}</div>
+                    <div class="song-artist">${escapeHtml(song.artist)}</div>
+                </div>
+                <div class="actions-group">
+                    <button class="btn-play" onclick='handlePlayClick(${index}, ${customList ? JSON.stringify(customList).replace(/'/g, "\\'") : "null"})' title="Play">&#9654;</button>
+                    <button class="btn-add-pl" onclick='promptAddToPlaylist(${JSON.stringify(song).replace(/'/g, "\\'")})' title="Add to Playlist">+</button>
+                    <a class="btn-download" href="${song.streamUrl}" download="${escapeHtml(song.title)}.m4a" target="_blank">&#11015; MP3</a>
+                </div>
+            </div>
+        `;
+    }
+
+    function handlePlayClick(index, customList) {
+        if (customList) currentQueue = customList;
+        playSong(index);
+    }
+
     function playSong(index) {
-        const song = playlist[index];
+        const song = currentQueue[index];
         if (!song || !song.streamUrl) return;
 
         currentIndex = index;
 
         document.querySelectorAll('.song-card').forEach(c => c.classList.remove('active-playing'));
-        const card = document.getElementById(`card-${index}`);
-        if (card) card.classList.add('active-playing');
 
         document.getElementById('playerBar').classList.add('active');
         document.getElementById('playerTitle').textContent = song.title;
@@ -497,7 +808,7 @@
     }
 
     function nextSong() {
-        if (currentIndex < playlist.length - 1) playSong(currentIndex + 1);
+        if (currentIndex < currentQueue.length - 1) playSong(currentIndex + 1);
     }
 
     function seekAudio(e) {
@@ -519,8 +830,88 @@
     audio.addEventListener('ended', () => {
         isPlaying = false;
         document.getElementById('playPauseBtn').innerHTML = '&#9654;';
-        if (currentIndex < playlist.length - 1) nextSong();
+        if (currentIndex < currentQueue.length - 1) nextSong();
     });
+
+    // ==================== USER CUSTOM PLAYLISTS ====================
+    function promptAddToPlaylist(song) {
+        const names = Object.keys(myPlaylists);
+        if (names.length === 0) {
+            createNewPlaylistPrompt(song);
+            return;
+        }
+
+        const choice = prompt(`Add "${song.title}" to which playlist?\n\nAvailable:\n` + names.map((n, i) => `${i + 1}. ${n}`).join('\n') + `\n\nType the playlist name:`, names[0]);
+        if (!choice) return;
+
+        const target = choice.trim();
+        if (!myPlaylists[target]) myPlaylists[target] = [];
+
+        // Check duplicate
+        if (!myPlaylists[target].some(s => s.title === song.title && s.artist === song.artist)) {
+            myPlaylists[target].push(song);
+            savePlaylists();
+            alert(`Added to "${target}"!`);
+        } else {
+            alert(`Already in "${target}"!`);
+        }
+    }
+
+    function createNewPlaylistPrompt(initialSong = null) {
+        const name = prompt("Enter a name for the new playlist:");
+        if (!name || !name.trim()) return;
+
+        const cleanName = name.trim();
+        if (!myPlaylists[cleanName]) {
+            myPlaylists[cleanName] = initialSong ? [initialSong] : [];
+            savePlaylists();
+            renderMyPlaylists();
+            alert(`Playlist "${cleanName}" created!`);
+        }
+    }
+
+    function renderMyPlaylists() {
+        const grid = document.getElementById('myPlaylistsGrid');
+        const names = Object.keys(myPlaylists);
+
+        if (names.length === 0) {
+            grid.innerHTML = '<div class="empty-state"><p>No custom playlists yet. Click "+ New Playlist" to create one!</p></div>';
+            return;
+        }
+
+        grid.innerHTML = names.map(name => {
+            const songs = myPlaylists[name] || [];
+            const cover = songs.length > 0 ? songs[0].artwork : 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&h=300&fit=crop';
+            return `
+                <div class="playlist-card" onclick="viewMyPlaylist('${escapeHtml(name)}')">
+                    <img class="playlist-thumb" src="${cover}" alt="${escapeHtml(name)}">
+                    <div class="playlist-name">${escapeHtml(name)}</div>
+                    <div class="playlist-author">${songs.length} Songs</div>
+                    <div class="playlist-tag">&#9835; My Playlist</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function viewMyPlaylist(name) {
+        const songs = myPlaylists[name] || [];
+        const container = document.getElementById('myPlaylistSongsList');
+
+        if (songs.length === 0) {
+            container.innerHTML = `<div class="empty-state"><p>Playlist "${name}" is empty. Search songs and click "+" to add them here!</p></div>`;
+            return;
+        }
+
+        container.innerHTML = `
+            <div class="section-header" style="margin-top:20px;">
+                <div class="section-title">&#128194; ${name} (${songs.length} Songs)</div>
+                <button class="btn-play-all" onclick='playAllPlaylist(${JSON.stringify(songs).replace(/'/g, "\\'")})'>&#9654; Play All</button>
+            </div>
+            <div class="song-list">
+                ${songs.map((s, i) => renderSongCard(s, i, 'mypl', songs)).join('')}
+            </div>
+        `;
+    }
 
     function formatDuration(sec) {
         if (!sec || isNaN(sec)) return '0:00';
@@ -536,7 +927,7 @@
         return div.innerHTML;
     }
 
-    // Auto-load trending on start
+    // Auto-load on open
     window.addEventListener('DOMContentLoaded', () => {
         quickSearch('Aval');
     });
