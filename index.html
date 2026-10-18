@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>MusicFlow - Ad-Free Music & Full Playlists</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -652,7 +655,7 @@
 
 <div class="container">
     <div class="header">
-        <div class="badge">100% FULL-LENGTH SONGS &bull; AD-FREE &bull; MP3 DOWNLOADS</div>
+        <div class="badge">100% FULL SONGS &bull; AD-FREE &bull; MP3 DOWNLOADS &bull; v2.2</div>
         <h1>MusicFlow</h1>
         <p>Stream complete full songs, view playlists line-by-line, and download audio</p>
     </div>
@@ -736,31 +739,45 @@
 </div>
 
 <!-- DOWNLOAD MODAL -->
-<div id="downloadModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); z-index:2000; align-items:center; justify-content:center; padding:20px;">
-    <div style="background:#171333; border:1px solid rgba(255,255,255,0.15); border-radius:20px; max-width:440px; width:100%; padding:24px; box-shadow:0 15px 40px rgba(0,0,0,0.6); position:relative;">
-        <button onclick="closeDownloadModal()" style="position:absolute; top:16px; right:16px; background:none; border:none; color:#888; font-size:1.4em; cursor:pointer;">&times;</button>
-        <div style="display:flex; gap:14px; align-items:center; margin-bottom:18px;">
-            <img id="dlModalThumb" src="" style="width:60px; height:60px; border-radius:10px; object-fit:cover; background:#221e42;">
+<div id="downloadModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(8px); z-index:2000; align-items:center; justify-content:center; padding:18px;">
+    <div style="background:#171333; border:1px solid rgba(255,255,255,0.18); border-radius:20px; max-width:440px; width:100%; padding:22px; box-shadow:0 15px 40px rgba(0,0,0,0.7); position:relative;">
+        <button onclick="closeDownloadModal()" style="position:absolute; top:14px; right:16px; background:none; border:none; color:#aaa; font-size:1.6em; cursor:pointer; line-height:1;">&times;</button>
+        <div style="display:flex; gap:12px; align-items:center; margin-bottom:16px; padding-right:20px;">
+            <img id="dlModalThumb" src="" style="width:58px; height:58px; border-radius:10px; object-fit:cover; background:#221e42; flex-shrink:0;">
             <div style="flex:1; min-width:0;">
-                <div id="dlModalTitle" style="font-weight:700; font-size:1.05em; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Song Title</div>
-                <div id="dlModalArtist" style="color:#9ba1b5; font-size:0.85em;">Artist</div>
+                <div id="dlModalTitle" style="font-weight:700; font-size:0.98em; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Song Title</div>
+                <div id="dlModalArtist" style="color:#9ba1b5; font-size:0.82em; margin-top:2px;">Artist</div>
             </div>
         </div>
-        <div style="font-size:0.88em; color:#bbb; margin-bottom:14px; font-weight:600;">Choose Download Server (100% Free MP3):</div>
-        <div style="display:flex; flex-direction:column; gap:10px;">
-            <a id="dlOpt1" href="#" target="_blank" style="padding:12px 18px; border-radius:12px; background:linear-gradient(135deg, #11998e, #38ef7d); color:#fff; text-decoration:none; font-weight:700; font-size:0.92em; display:flex; justify-content:space-between; align-items:center;">
-                <span>&#127911; Server 1: High-Speed MP3 (Y2Mate)</span>
-                <span>&#11015;</span>
+
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; background:rgba(255,255,255,0.05); padding:8px 12px; border-radius:10px;">
+            <span style="font-size:0.82em; color:#bbb;">Song Link:</span>
+            <div>
+                <button onclick="copySongLink()" style="background:rgba(248,87,166,0.25); border:1px solid rgba(248,87,166,0.5); color:#fff; padding:4px 10px; border-radius:8px; font-size:0.78em; cursor:pointer; font-weight:600;">📋 Copy Link</button>
+                <span id="copyMsg" style="display:none; color:#38ef7d; font-size:0.78em; margin-left:6px; font-weight:700;">Copied!</span>
+            </div>
+        </div>
+
+        <div style="font-size:0.86em; color:#ddd; margin-bottom:10px; font-weight:700;">Select Download Server:</div>
+        <div style="display:flex; flex-direction:column; gap:9px;">
+            <a id="dlOptCobalt" href="https://cobalt.tools" target="_blank" style="padding:11px 16px; border-radius:12px; background:linear-gradient(135deg, #667eea, #764ba2); color:#fff; text-decoration:none; font-weight:700; font-size:0.9em; display:flex; justify-content:space-between; align-items:center;">
+                <span>🛡️ Server 1: Clean & Ad-Free (Cobalt)</span>
+                <span>⬇ MP3</span>
             </a>
-            <a id="dlOpt2" href="#" target="_blank" style="padding:12px 18px; border-radius:12px; background:linear-gradient(135deg, #667eea, #764ba2); color:#fff; text-decoration:none; font-weight:700; font-size:0.92em; display:flex; justify-content:space-between; align-items:center;">
-                <span>&#128190; Server 2: Clean Ad-Free (Cobalt)</span>
-                <span>&#11015;</span>
+            <a id="dlOptY2mate" href="#" target="_blank" style="padding:11px 16px; border-radius:12px; background:linear-gradient(135deg, #11998e, #38ef7d); color:#fff; text-decoration:none; font-weight:700; font-size:0.9em; display:flex; justify-content:space-between; align-items:center;">
+                <span>⚡ Server 2: Instant Auto-Convert (Y2Mate)</span>
+                <span>⬇ MP3</span>
             </a>
-            <a id="dlOpt3" href="#" target="_blank" style="padding:12px 18px; border-radius:12px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:#fff; text-decoration:none; font-weight:600; font-size:0.9em; display:flex; justify-content:space-between; align-items:center;">
-                <span>&#9889; Server 3: YTmp3 Converter</span>
-                <span>&#11015;</span>
+            <a id="dlOptDirpy" href="#" target="_blank" style="padding:11px 16px; border-radius:12px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:#fff; text-decoration:none; font-weight:600; font-size:0.88em; display:flex; justify-content:space-between; align-items:center;">
+                <span>🎵 Server 3: Dirpy Studio MP3</span>
+                <span>⬇ MP3</span>
+            </a>
+            <a id="dlOptYtmp3" href="#" target="_blank" style="padding:11px 16px; border-radius:12px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:#fff; text-decoration:none; font-weight:600; font-size:0.88em; display:flex; justify-content:space-between; align-items:center;">
+                <span>🎧 Server 4: YTmp3 Converter</span>
+                <span>⬇ MP3</span>
             </a>
         </div>
+        <p style="font-size:0.75em; color:#7e8499; margin-top:12px; text-align:center;">All servers provide complete full-length audio files for free.</p>
     </div>
 </div>
 
@@ -784,6 +801,7 @@
             <button class="ctrl-btn" onclick="prevSong()" title="Previous">&#9198;</button>
             <button class="ctrl-play" id="playPauseBtn" onclick="togglePlayPause()">&#9654;</button>
             <button class="ctrl-btn" onclick="nextSong()" title="Next">&#9197;</button>
+            <button class="ctrl-btn" onclick="downloadCurrentSong()" title="Download MP3" style="color:#38ef7d; font-size:1.15em;">&#11015;</button>
         </div>
     </div>
 </div>
@@ -803,11 +821,33 @@
     let isRepeat = false;
     let isShuffle = false;
     let activePlaylistInfo = { title: '', author: '', total: 0 };
+    const songCatalog = {};
 
     let myPlaylists = JSON.parse(localStorage.getItem('my_music_playlists') || '{"Favorites": []}');
 
     function savePlaylists() {
         localStorage.setItem('my_music_playlists', JSON.stringify(myPlaylists));
+    }
+
+    function registerSong(song) {
+        if (song && song.videoId) {
+            songCatalog[song.videoId] = song;
+        }
+        return song;
+    }
+
+    function openDownloadModalByVideoId(videoId) {
+        const song = songCatalog[videoId] || currentQueue.find(s => s.videoId === videoId);
+        if (song) {
+            openDownloadModal(song);
+        }
+    }
+
+    function promptAddToPlaylistByVideoId(videoId) {
+        const song = songCatalog[videoId] || currentQueue.find(s => s.videoId === videoId);
+        if (song) {
+            promptAddToPlaylist(song);
+        }
     }
 
     // Initialize Privacy-Enhanced YouTube Player
@@ -1044,7 +1084,9 @@
 
     function renderQueueItems() {
         const queueList = document.getElementById('queueList');
-        queueList.innerHTML = currentQueue.map((song, i) => `
+        queueList.innerHTML = currentQueue.map((song, i) => {
+            registerSong(song);
+            return `
             <div class="queue-row ${i === currentIndex ? 'active' : ''}" id="qrow-${i}" onclick="playSong(${i})">
                 <div class="queue-num" id="qnum-${i}">${i === currentIndex ? '&#9654;' : (i + 1)}</div>
                 <div class="queue-thumb-box">
@@ -1056,10 +1098,11 @@
                     <div class="queue-track-author">${escapeHtml(song.artist)}</div>
                 </div>
                 <div class="queue-row-actions" onclick="event.stopPropagation()">
-                    <button class="queue-btn-download" onclick='openDownloadModal(${JSON.stringify(song).replace(/'/g, "\\'")})' title="Download MP3">&#11015; MP3</button>
+                    <button class="queue-btn-download" onclick="openDownloadModalByVideoId('${song.videoId}')" title="Download MP3">&#11015; MP3</button>
                 </div>
             </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     function updateQueueHighlight() {
@@ -1099,6 +1142,7 @@
     }
 
     function renderSongCard(song, index, context = 'search', customList = null) {
+        registerSong(song);
         return `
             <div class="song-card" id="card-${context}-${index}">
                 <img class="song-thumb" src="${song.artwork}" alt="${escapeHtml(song.title)}"
@@ -1109,8 +1153,8 @@
                 </div>
                 <div class="actions-group">
                     <button class="btn-play" onclick='handlePlayClick(${index}, ${customList ? JSON.stringify(customList).replace(/'/g, "\\'") : "null"})' title="Play Full Song">&#9654;</button>
-                    <button class="btn-add-pl" onclick='promptAddToPlaylist(${JSON.stringify(song).replace(/'/g, "\\'")})' title="Add to Playlist">+</button>
-                    <button class="btn-download" onclick='openDownloadModal(${JSON.stringify(song).replace(/'/g, "\\'")})' title="Download Full MP3">&#11015; MP3</button>
+                    <button class="btn-add-pl" onclick="promptAddToPlaylistByVideoId('${song.videoId}')" title="Add to Playlist">+</button>
+                    <button class="btn-download" onclick="openDownloadModalByVideoId('${song.videoId}')" title="Download Full MP3">&#11015; MP3</button>
                 </div>
             </div>
         `;
@@ -1177,8 +1221,19 @@
     }
 
     // ==================== DOWNLOAD MODAL ====================
+    let currentModalSong = null;
+
+    function downloadCurrentSong() {
+        if (currentIndex >= 0 && currentQueue[currentIndex]) {
+            openDownloadModal(currentQueue[currentIndex]);
+        } else {
+            alert("Please play or select a song first to download.");
+        }
+    }
+
     function openDownloadModal(song) {
         if (!song || !song.videoId) return;
+        currentModalSong = song;
 
         document.getElementById('dlModalThumb').src = song.artwork || '';
         document.getElementById('dlModalTitle').textContent = song.title || 'Song';
@@ -1186,18 +1241,38 @@
 
         const ytUrl = `https://www.youtube.com/watch?v=${song.videoId}`;
 
-        document.getElementById('dlOpt1').href = `https://www.y2mate.com/youtube/${song.videoId}`;
-        document.getElementById('dlOpt2').href = `https://cobalt.tools`;
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(ytUrl).catch(() => {});
-        }
-        document.getElementById('dlOpt3').href = `https://ytmp3.nu/?url=${encodeURIComponent(ytUrl)}`;
+        document.getElementById('dlOptCobalt').href = `https://cobalt.tools`;
+        document.getElementById('dlOptY2mate').href = `https://www.y2mate.com/youtube/${song.videoId}`;
+        document.getElementById('dlOptDirpy').href = `https://dirpy.com/studio?url=${encodeURIComponent(ytUrl)}`;
+        document.getElementById('dlOptYtmp3').href = `https://ytmp3.nu/?url=${encodeURIComponent(ytUrl)}`;
+
+        const copyMsg = document.getElementById('copyMsg');
+        if (copyMsg) copyMsg.style.display = 'none';
 
         document.getElementById('downloadModal').style.display = 'flex';
     }
 
+    function copySongLink() {
+        if (!currentModalSong || !currentModalSong.videoId) return;
+        const ytUrl = `https://www.youtube.com/watch?v=${currentModalSong.videoId}`;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(ytUrl).then(() => {
+                const msg = document.getElementById('copyMsg');
+                if (msg) {
+                    msg.style.display = 'inline';
+                    setTimeout(() => { msg.style.display = 'none'; }, 2500);
+                }
+            }).catch(() => {
+                prompt("Copy this song link:", ytUrl);
+            });
+        } else {
+            prompt("Copy this song link:", ytUrl);
+        }
+    }
+
     function closeDownloadModal() {
         document.getElementById('downloadModal').style.display = 'none';
+        currentModalSong = null;
     }
 
     // ==================== USER CUSTOM PLAYLISTS ====================
@@ -1272,6 +1347,7 @@
         }
 
         currentQueue = songs;
+        currentQueue.forEach(s => registerSong(s));
         activePlaylistInfo = { title: name, author: 'My Playlist', total: songs.length };
 
         const queueBox = document.getElementById('playlistQueueBox');
