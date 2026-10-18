@@ -620,11 +620,13 @@
             .btn-direct-download { padding: 5px 9px; font-size: 0.72em; }
         }
     </style>
+    <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
 <!-- Hidden Native Audio Engine for 100% Ad-Free Audio -->
 <audio id="nativeAudio" preload="auto" playsinline></audio>
+<div id="yt-player-box" style="position:fixed; bottom:0; right:0; width:1px; height:1px; opacity:0.01; pointer-events:none;"><div id="yt-player"></div></div>
 
 <!-- Toast for In-Page Status & Downloads -->
 <div id="toastNotification" class="toast-box"></div>
@@ -697,6 +699,38 @@
     </div>
 </div>
 
+<!-- IN-PAGE DIRECT MP3 DOWNLOAD MODAL (NO EXTERNAL WEBSITES, NO GOOGLE 403) -->
+<div id="directDownloadModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(8px); z-index:2500; align-items:center; justify-content:center; padding:18px;">
+    <div style="background:#171333; border:1px solid rgba(56,239,125,0.3); border-radius:20px; max-width:440px; width:100%; padding:22px; box-shadow:0 15px 40px rgba(0,0,0,0.7); position:relative;">
+        <button onclick="closeDirectDownloadModal()" style="position:absolute; top:14px; right:16px; background:none; border:none; color:#aaa; font-size:1.6em; cursor:pointer; line-height:1;">&times;</button>
+        <div style="display:flex; gap:12px; align-items:center; margin-bottom:16px; padding-right:20px;">
+            <img id="dlTrackThumb" src="" style="width:58px; height:58px; border-radius:10px; object-fit:cover; background:#221e42; flex-shrink:0;">
+            <div style="flex:1; min-width:0;">
+                <div id="dlTrackTitle" style="font-weight:700; font-size:0.98em; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Song Title</div>
+                <div id="dlTrackArtist" style="color:#9ba1b5; font-size:0.82em; margin-top:2px;">Artist</div>
+            </div>
+        </div>
+
+        <div style="font-size:0.86em; color:#38ef7d; margin-bottom:10px; font-weight:700; display:flex; align-items:center; gap:6px;">
+            <span>⬇ Direct MP3 Download (100% Free):</span>
+        </div>
+
+        <!-- Embedded In-Page Download Widget: Converts & Downloads directly to mobile/PC without leaving this page -->
+        <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:6px; margin-bottom:12px; min-height:75px; display:flex; align-items:center; justify-content:center;">
+            <iframe id="dlWidgetIframe" src="" width="100%" height="70px" style="border:none; border-radius:8px; overflow:hidden;" referrerpolicy="origin-when-cross-origin"></iframe>
+        </div>
+
+        <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.05); padding:8px 12px; border-radius:10px;">
+            <span style="font-size:0.82em; color:#bbb;">Song Link:</span>
+            <div>
+                <button onclick="copyCurrentDownloadLink()" style="background:rgba(248,87,166,0.25); border:1px solid rgba(248,87,166,0.5); color:#fff; padding:4px 10px; border-radius:8px; font-size:0.78em; cursor:pointer; font-weight:600;">📋 Copy Link</button>
+                <span id="copyFeedback" style="display:none; color:#38ef7d; font-size:0.78em; margin-left:6px; font-weight:700;">Copied!</span>
+            </div>
+        </div>
+        <p style="font-size:0.75em; color:#7e8499; margin-top:12px; text-align:center;">Files download directly to your mobile or desktop file manager.</p>
+    </div>
+</div>
+
 <!-- ==================== FIXED BOTTOM MUSIC PLAYER ==================== -->
 <div class="player-bar" id="playerBar">
     <div class="player-progress-bar" id="progressBar" onclick="seekAudio(event)">
@@ -724,6 +758,8 @@
 
 <script>
     const nativeAudio = document.getElementById('nativeAudio');
+    let ytPlayer = null;
+    let isYtFallback = false;
     let currentQueue = [];
     let currentIndex = -1;
     let isPlaying = false;
@@ -732,11 +768,47 @@
     let activePlaylistInfo = { title: '', author: '', total: 0 };
     const songCatalog = {};
     const streamCache = {};
+    let currentDownloadVideoId = null;
 
     let myPlaylists = JSON.parse(localStorage.getItem('my_music_playlists') || '{"Favorites": []}');
 
     function savePlaylists() {
         localStorage.setItem('my_music_playlists', JSON.stringify(myPlaylists));
+    }
+
+    window.onYouTubeIframeAPIReady = function() {
+        ytPlayer = new YT.Player('yt-player', {
+            host: 'https://www.youtube-nocookie.com',
+            height: '100',
+            width: '100',
+            playerVars: {
+                'playsinline': 1,
+                'controls': 0,
+                'disablekb': 1,
+                'rel': 0,
+                'modestbranding': 1,
+                'iv_load_policy': 3,
+                'origin': window.location.origin
+            },
+            events: {
+                'onStateChange': onYtStateChange
+            }
+        });
+    };
+
+    function onYtStateChange(event) {
+        if (!isYtFallback) return;
+        if (event.data === YT.PlayerState.PLAYING) {
+            isPlaying = true;
+            document.getElementById('playPauseBtn').innerHTML = '&#9646;&#9646;';
+        } else if (event.data === YT.PlayerState.PAUSED) {
+            isPlaying = false;
+            document.getElementById('playPauseBtn').innerHTML = '&#9654;';
+        } else if (event.data === YT.PlayerState.ENDED) {
+            if (isRepeat) playSong(currentIndex);
+            else if (isShuffle) playSong(Math.floor(Math.random() * currentQueue.length));
+            else if (currentIndex < currentQueue.length - 1) nextSong();
+        }
     }
 
     function registerSong(song) {
@@ -906,7 +978,7 @@
                     <div class="queue-track-author">${escapeHtml(song.artist)}</div>
                 </div>
                 <div class="queue-row-actions" onclick="event.stopPropagation()">
-                    <button class="btn-direct-download" onclick="downloadSongDirect('${song.videoId}', '${escapeHtml(song.title).replace(/'/g, "\\'")}')" title="Download directly to your device without leaving">&#11015; Download</button>
+                    <button class="btn-direct-download" onclick="openDirectDownload('${song.videoId}', '${escapeHtml(song.title).replace(/'/g, "\\'")}', '${escapeHtml(song.artist).replace(/'/g, "\\'")}', '${song.artwork}')" title="Download MP3 directly">&#11015; Download</button>
                     <button class="btn-row-add" onclick="promptAddToPlaylistByVideoId('${song.videoId}')" title="Add to Playlist">+</button>
                 </div>
             </div>
@@ -950,7 +1022,7 @@
         showToast(isShuffle ? '🔀 Shuffle: ON' : '🔀 Shuffle: OFF');
     }
 
-    // ==================== 100% AD-FREE NATIVE AUDIO ENGINE ====================
+    // ==================== 100% AD-FREE AUDIO ENGINE WITH DUAL FALLBACK ====================
     async function playSong(index) {
         const song = currentQueue[index];
         if (!song || !song.videoId) return;
@@ -968,6 +1040,7 @@
         showToast(`🎵 Streaming "${song.title}" (Ad-Free)...`);
 
         try {
+            isYtFallback = false;
             let audioUrl = streamCache[song.videoId];
 
             if (!audioUrl) {
@@ -1003,11 +1076,19 @@
                 throw new Error("No direct stream");
             }
         } catch (e) {
-            console.warn("Direct stream error, falling back:", e);
+            console.warn("Direct stream failed, falling back to backup player:", e);
+            isYtFallback = true;
+            if (ytPlayer && ytPlayer.loadVideoById) {
+                ytPlayer.loadVideoById(song.videoId);
+                ytPlayer.playVideo();
+                isPlaying = true;
+                document.getElementById('playPauseBtn').innerHTML = '&#9646;&#9646;';
+            }
         }
     }
 
     nativeAudio.addEventListener('timeupdate', () => {
+        if (isYtFallback) return;
         const current = nativeAudio.currentTime || 0;
         const duration = nativeAudio.duration || (currentQueue[currentIndex] ? currentQueue[currentIndex].duration : 0);
         if (duration > 0) {
@@ -1030,6 +1111,19 @@
     });
 
     function togglePlayPause() {
+        if (isYtFallback && ytPlayer) {
+            if (isPlaying) {
+                ytPlayer.pauseVideo();
+                isPlaying = false;
+                document.getElementById('playPauseBtn').innerHTML = '&#9654;';
+            } else {
+                ytPlayer.playVideo();
+                isPlaying = true;
+                document.getElementById('playPauseBtn').innerHTML = '&#9646;&#9646;';
+            }
+            return;
+        }
+
         if (!nativeAudio.src) return;
         if (isPlaying) {
             nativeAudio.pause();
@@ -1051,54 +1145,65 @@
     }
 
     function seekAudio(e) {
-        if (!nativeAudio.duration) return;
         const bar = document.getElementById('progressBar');
         const rect = bar.getBoundingClientRect();
         const percent = (e.clientX - rect.left) / rect.width;
-        nativeAudio.currentTime = percent * nativeAudio.duration;
+        if (isYtFallback && ytPlayer && ytPlayer.getDuration) {
+            ytPlayer.seekTo(percent * ytPlayer.getDuration(), true);
+        } else if (nativeAudio.duration) {
+            nativeAudio.currentTime = percent * nativeAudio.duration;
+        }
     }
 
     // ========================================================
-    // DIRECT IN-BROWSER DOWNLOAD (NO OTHER WEBSITES, NO ADS, NO PAYMENT)
+    // IN-PAGE DIRECT MP3 DOWNLOAD (NO EXTERNAL WEBSITES, NO GOOGLE 403)
     // ========================================================
-    async function downloadSongDirect(videoId, songTitle) {
-        showToast(`⏳ Preparing direct download for "${songTitle}"...`);
-        try {
-            let audioUrl = streamCache[videoId];
+    function openDirectDownload(videoId, songTitle, artist, thumb) {
+        currentDownloadVideoId = videoId;
+        const song = songCatalog[videoId] || currentQueue.find(s => s.videoId === videoId) || { title: songTitle, artist, artwork: thumb };
 
-            if (!audioUrl) {
-                const res = await fetch(`https://invidious.f5.si/api/v1/videos/${videoId}`).then(r => r.json());
-                const stream = (res.adaptiveFormats || []).find(f => (f.type || '').includes('audio/mp4'))
-                            || (res.adaptiveFormats || []).find(f => (f.type || '').includes('audio'));
-                if (stream && stream.url) {
-                    audioUrl = stream.url;
-                    streamCache[videoId] = audioUrl;
+        document.getElementById('dlTrackThumb').src = song.artwork || thumb || '';
+        document.getElementById('dlTrackTitle').textContent = song.title || songTitle || 'Song';
+        document.getElementById('dlTrackArtist').textContent = song.artist || artist || 'Artist';
+
+        // Set embedded MP3 converter widget without navigating away
+        const widgetUrl = `https://bestapi.cc/widget/single-button/mp3/${videoId}/dark`;
+        document.getElementById('dlWidgetIframe').src = widgetUrl;
+
+        const copyFeedback = document.getElementById('copyFeedback');
+        if (copyFeedback) copyFeedback.style.display = 'none';
+
+        document.getElementById('directDownloadModal').style.display = 'flex';
+    }
+
+    function closeDirectDownloadModal() {
+        document.getElementById('directDownloadModal').style.display = 'none';
+        document.getElementById('dlWidgetIframe').src = '';
+        currentDownloadVideoId = null;
+    }
+
+    function copyCurrentDownloadLink() {
+        if (!currentDownloadVideoId) return;
+        const ytUrl = `https://www.youtube.com/watch?v=${currentDownloadVideoId}`;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(ytUrl).then(() => {
+                const msg = document.getElementById('copyFeedback');
+                if (msg) {
+                    msg.style.display = 'inline';
+                    setTimeout(() => { msg.style.display = 'none'; }, 2500);
                 }
-            }
-
-            if (!audioUrl) throw new Error("Audio stream could not be loaded");
-
-            const safeTitle = (songTitle || 'song').replace(/[/\\?%*:|"<>]/g, '').trim();
-
-            // Trigger direct download without leaving website
-            const a = document.createElement('a');
-            a.href = audioUrl;
-            a.download = `${safeTitle}.m4a`;
-            a.target = '_blank';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-
-            showToast(`✅ Download started! Saving "${safeTitle}.m4a" directly to your device.`);
-        } catch (e) {
-            showToast(`❌ Download error: ${e.message}`);
+            }).catch(() => {
+                prompt("Copy this song link:", ytUrl);
+            });
+        } else {
+            prompt("Copy this song link:", ytUrl);
         }
     }
 
     function downloadCurrentSong() {
         if (currentIndex >= 0 && currentQueue[currentIndex]) {
             const s = currentQueue[currentIndex];
-            downloadSongDirect(s.videoId, s.title);
+            openDirectDownload(s.videoId, s.title, s.artist, s.artwork);
         } else {
             showToast("Please select or play a song first to download.");
         }
