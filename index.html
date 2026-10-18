@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MusicFlow - Full Song Player & Downloader</title>
+    <title>MusicFlow - Ad-Free Music & Full Playlists</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -23,43 +23,43 @@
             background: radial-gradient(circle at top left, #201747, #0d0b21 65%);
             min-height: 100vh;
             color: var(--text-main);
-            padding-bottom: 150px;
+            padding-bottom: 140px;
         }
 
         .container {
             max-width: 980px;
             margin: 0 auto;
-            padding: 25px 18px;
+            padding: 22px 16px;
         }
 
         /* Top Header */
         .header {
             text-align: center;
-            margin-bottom: 22px;
+            margin-bottom: 20px;
         }
         .header .badge {
             display: inline-block;
             background: rgba(248, 87, 166, 0.15);
             color: #f857a6;
-            padding: 5px 14px;
+            padding: 4px 14px;
             border-radius: 20px;
-            font-size: 0.82em;
+            font-size: 0.8em;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             border: 1px solid rgba(248, 87, 166, 0.3);
             letter-spacing: 0.5px;
         }
         .header h1 {
-            font-size: 2.5em;
+            font-size: 2.4em;
             font-weight: 800;
             background: linear-gradient(90deg, #ff719a, #ff9068, #fcd000);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
         .header p {
             color: var(--text-muted);
-            font-size: 0.98em;
+            font-size: 0.95em;
         }
 
         /* Navigation Tabs */
@@ -67,17 +67,17 @@
             display: flex;
             justify-content: center;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             flex-wrap: wrap;
         }
         .nav-btn {
-            padding: 10px 22px;
+            padding: 9px 20px;
             border: 1px solid var(--card-border);
             border-radius: 30px;
             background: rgba(255, 255, 255, 0.04);
             color: var(--text-muted);
             cursor: pointer;
-            font-size: 0.92em;
+            font-size: 0.9em;
             font-weight: 600;
             transition: all 0.25s ease;
         }
@@ -96,12 +96,12 @@
         }
         .search-input {
             flex: 1;
-            padding: 15px 22px;
+            padding: 14px 22px;
             border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 50px;
             background: rgba(255, 255, 255, 0.06);
             color: #fff;
-            font-size: 1.05em;
+            font-size: 1.02em;
             outline: none;
             transition: all 0.3s;
         }
@@ -112,29 +112,26 @@
             box-shadow: 0 0 25px rgba(248, 87, 166, 0.3);
         }
         .search-submit {
-            padding: 15px 30px;
+            padding: 14px 28px;
             border: none;
             border-radius: 50px;
             background: linear-gradient(135deg, #f857a6, #ff5858);
             color: #fff;
-            font-size: 1em;
+            font-size: 0.98em;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s;
             white-space: nowrap;
         }
-        .search-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(248, 87, 166, 0.4);
-        }
+        .search-submit:hover { transform: translateY(-2px); }
 
         /* Quick Tag Pills */
         .tags-row {
             display: flex;
             gap: 8px;
             overflow-x: auto;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
+            padding-bottom: 8px;
+            margin-bottom: 18px;
             scrollbar-width: none;
         }
         .tags-row::-webkit-scrollbar { display: none; }
@@ -144,7 +141,7 @@
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.08);
             color: #b0b5c7;
-            font-size: 0.85em;
+            font-size: 0.84em;
             cursor: pointer;
             white-space: nowrap;
             transition: all 0.2s;
@@ -159,7 +156,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 22px 0 12px 0;
+            margin: 20px 0 12px 0;
             padding-bottom: 6px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
@@ -176,7 +173,7 @@
             color: var(--text-muted);
         }
 
-        /* Separate Playlists Grid */
+        /* Playlists Cards Grid */
         .playlists-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
@@ -199,13 +196,36 @@
             border-color: rgba(248, 87, 166, 0.4);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
         }
-        .playlist-thumb {
+        .playlist-thumb-box {
+            position: relative;
             width: 100%;
             aspect-ratio: 16 / 9;
             border-radius: 10px;
-            object-fit: cover;
+            overflow: hidden;
             margin-bottom: 10px;
             background: #1e1a3d;
+        }
+        .playlist-thumb {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .playlist-overlay-count {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 40%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 0.82em;
+            font-weight: 700;
+            gap: 2px;
         }
         .playlist-name {
             font-size: 0.92em;
@@ -223,57 +243,180 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .playlist-tag {
-            margin-top: 8px;
-            display: inline-block;
-            background: rgba(102, 126, 234, 0.2);
-            color: #8da2fb;
-            font-size: 0.72em;
-            padding: 2px 8px;
-            border-radius: 10px;
-            align-self: flex-start;
-        }
 
-        /* Playlist Detail Banner View */
-        .playlist-detail-banner {
-            background: linear-gradient(135deg, rgba(248, 87, 166, 0.15), rgba(102, 126, 234, 0.15));
+        /* ======================================================== */
+        /* EXACT LINE-BY-LINE PLAYLIST QUEUE VIEW (FROM USER IMAGE) */
+        /* ======================================================== */
+        .playlist-queue-box {
+            background: rgba(20, 16, 43, 0.92);
             border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 18px;
-            padding: 20px;
+            margin-bottom: 25px;
+            overflow: hidden;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.45);
+        }
+
+        .queue-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.03);
+        }
+        .queue-top-row {
             display: flex;
-            gap: 20px;
-            align-items: center;
-            margin-bottom: 22px;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 4px;
         }
-        .playlist-detail-banner img {
-            width: 110px;
-            height: 80px;
-            border-radius: 12px;
-            object-fit: cover;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        .queue-title {
+            font-size: 1.25em;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.3;
+            flex: 1;
+            padding-right: 14px;
         }
-        .playlist-detail-info { flex: 1; min-width: 0; }
-        .playlist-detail-title { font-size: 1.3em; font-weight: 800; margin-bottom: 4px; }
-        .playlist-detail-sub { color: var(--text-muted); font-size: 0.88em; margin-bottom: 12px; }
-        .banner-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
-        .btn-play-all {
-            padding: 9px 20px;
+        .queue-close-btn {
+            background: none;
             border: none;
-            border-radius: 25px;
-            background: linear-gradient(135deg, #11998e, #38ef7d);
-            color: #fff;
-            font-weight: 700;
-            font-size: 0.9em;
+            color: #aaa;
+            font-size: 1.6em;
             cursor: pointer;
+            line-height: 1;
+            padding: 0 4px;
+            transition: color 0.2s;
         }
-        .btn-back {
-            padding: 9px 18px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 25px;
-            background: rgba(255, 255, 255, 0.08);
-            color: #fff;
+        .queue-close-btn:hover { color: #fff; }
+        .queue-meta {
             font-size: 0.88em;
+            color: #9ba1b5;
+            margin-bottom: 12px;
+        }
+        .queue-actions-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .queue-icon-btn {
+            background: none;
+            border: none;
+            color: #a4a9bd;
+            font-size: 1.3em;
             cursor: pointer;
+            transition: color 0.2s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+        }
+        .queue-icon-btn:hover { color: #fff; transform: scale(1.15); }
+        .queue-icon-btn.active {
+            color: #f857a6;
+            text-shadow: 0 0 10px rgba(248, 87, 166, 0.6);
+        }
+
+        /* Numbered Line-by-Line List */
+        .queue-list {
+            max-height: 520px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+        }
+        .queue-row {
+            display: flex;
+            align-items: center;
+            padding: 10px 16px;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .queue-row:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+        .queue-row.active {
+            background: rgba(248, 87, 166, 0.16);
+            border-left: 4px solid #f857a6;
+        }
+        .queue-num {
+            width: 24px;
+            font-size: 0.9em;
+            color: #888d9e;
+            text-align: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .queue-row.active .queue-num {
+            color: #f857a6;
+            font-size: 1.1em;
+        }
+        .queue-thumb-box {
+            position: relative;
+            width: 84px;
+            height: 48px;
+            border-radius: 8px;
+            overflow: hidden;
+            flex-shrink: 0;
+            background: #191636;
+        }
+        .queue-thumb-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .queue-dur-badge {
+            position: absolute;
+            bottom: 3px;
+            right: 3px;
+            background: rgba(0, 0, 0, 0.82);
+            color: #fff;
+            font-size: 0.7em;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+        .queue-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .queue-track-title {
+            font-size: 0.92em;
+            font-weight: 600;
+            color: #fff;
+            line-height: 1.35;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 2px;
+        }
+        .queue-track-author {
+            font-size: 0.78em;
+            color: #9ba1b5;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .queue-row-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .queue-btn-download {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 16px;
+            font-size: 0.76em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .queue-btn-download:hover {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            border-color: transparent;
         }
 
         /* Song Card List */
@@ -368,7 +511,6 @@
             font-size: 0.82em;
             font-weight: 600;
             cursor: pointer;
-            text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 4px;
@@ -486,7 +628,7 @@
             font-variant-numeric: tabular-nums;
         }
 
-        /* Hidden YouTube IFrame Audio Engine */
+        /* Hidden YouTube Audio Engine */
         #yt-player-container {
             position: fixed;
             bottom: -9999px;
@@ -499,12 +641,11 @@
 
         @media (max-width: 600px) {
             .header h1 { font-size: 2em; }
-            .playlist-detail-banner { flex-direction: column; text-align: center; }
+            .queue-thumb-box { width: 72px; height: 42px; }
             .actions-group { gap: 6px; }
             .player-time { display: none; }
         }
     </style>
-    <!-- YouTube IFrame API for 100% FULL SONG playback without cutoff -->
     <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
@@ -513,7 +654,7 @@
     <div class="header">
         <div class="badge">100% FULL-LENGTH SONGS &bull; AD-FREE &bull; MP3 DOWNLOADS</div>
         <h1>MusicFlow</h1>
-        <p>Stream complete full songs, view playlists separately, and download audio</p>
+        <p>Stream complete full songs, view playlists line-by-line, and download audio</p>
     </div>
 
     <!-- Navigation Tabs -->
@@ -533,22 +674,36 @@
 
         <!-- Quick Tag Pills -->
         <div class="tags-row">
-            <div class="tag-pill" onclick="quickSearch('Manithan Aval song')">&#127926; Aval (Full Song)</div>
+            <div class="tag-pill" onclick="quickSearch('Kannada Best Melody Songs playlist')">&#127926; Kannada Melody Playlist</div>
+            <div class="tag-pill" onclick="quickSearch('Manithan Aval song')">&#128293; Aval (Full Song)</div>
             <div class="tag-pill" onclick="quickSearch('Anirudh hits playlist')">&#127911; Anirudh Playlist</div>
-            <div class="tag-pill" onclick="quickSearch('A.R. Rahman classics')">&#9734; A.R. Rahman</div>
-            <div class="tag-pill" onclick="quickSearch('Tamil melody songs playlist')">&#128293; Tamil Melody</div>
-            <div class="tag-pill" onclick="quickSearch('Hindi romantic songs')">&#128147; Hindi Romantic</div>
-            <div class="tag-pill" onclick="quickSearch('English pop hits playlist')">&#10024; English Pop</div>
+            <div class="tag-pill" onclick="quickSearch('Tamil melody songs playlist')">&#10024; Tamil Melody</div>
+            <div class="tag-pill" onclick="quickSearch('Hindi romantic songs playlist')">&#128147; Hindi Romantic</div>
             <div class="tag-pill" onclick="quickSearch('Lo-fi chill beats')">&#9749; Lo-Fi Beats</div>
         </div>
 
-        <!-- PLAYLIST DETAIL VIEW (Shown when user clicks any playlist) -->
-        <div id="playlistDetailContainer" style="display:none;"></div>
+        <!-- LINE-BY-LINE NUMBERED PLAYLIST VIEW (EXACTLY MATCHING USER'S IMAGE) -->
+        <div id="playlistQueueBox" class="playlist-queue-box" style="display:none;">
+            <div class="queue-header">
+                <div class="queue-top-row">
+                    <div class="queue-title" id="queueTitle">Playlist Title</div>
+                    <button class="queue-close-btn" onclick="closePlaylistQueue()" title="Close Playlist">&times;</button>
+                </div>
+                <div class="queue-meta" id="queueMeta">Channel &bull; 1 / 50</div>
+                <div class="queue-actions-row">
+                    <button class="queue-icon-btn" id="repeatBtn" onclick="toggleRepeat()" title="Repeat Playlist">&#128257;</button>
+                    <button class="queue-icon-btn" id="shuffleBtn" onclick="toggleShuffle()" title="Shuffle Playlist">&#128256;</button>
+                    <button class="queue-btn-download" onclick="playAllQueue()" style="background:linear-gradient(135deg, #11998e, #38ef7d); border:none; padding:6px 16px;">&#9654; Play All</button>
+                </div>
+            </div>
+            <!-- Numbered Line-by-Line Songs List -->
+            <div class="queue-list" id="queueList"></div>
+        </div>
 
-        <!-- SEPARATE PLAYLISTS SECTION -->
+        <!-- SEPARATE PLAYLISTS CARDS SECTION -->
         <div id="playlistsSection" style="display:none;">
             <div class="section-header">
-                <div class="section-title">&#128191; Playlists & Albums <span class="section-subtitle">(Shown Separately &bull; Click to open)</span></div>
+                <div class="section-title">&#128191; Playlists & Albums <span class="section-subtitle">(Click to open line-by-line list)</span></div>
                 <span id="playlistCount" class="section-subtitle"></span>
             </div>
             <div class="playlists-grid" id="playlistsGrid"></div>
@@ -563,7 +718,7 @@
             <div class="song-list" id="songsList">
                 <div class="empty-state">
                     <div class="icon">&#127925;</div>
-                    <p>Search any song or playlist above to start listening to the full track!</p>
+                    <p>Search any song or playlist above to start!</p>
                 </div>
             </div>
         </div>
@@ -573,41 +728,41 @@
     <div id="myPlaylistsView" style="display:none;">
         <div class="section-header">
             <div class="section-title">&#128194; My Created Playlists</div>
-            <button class="btn-play-all" onclick="createNewPlaylistPrompt()">+ New Playlist</button>
+            <button class="queue-btn-download" onclick="createNewPlaylistPrompt()" style="background:linear-gradient(135deg,#11998e,#38ef7d); border:none; padding:8px 16px;">+ New Playlist</button>
         </div>
         <div class="playlists-grid" id="myPlaylistsGrid"></div>
         <div class="song-list" id="myPlaylistSongsList"></div>
     </div>
 </div>
 
-    <!-- DOWNLOAD MODAL -->
-    <div id="downloadModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); z-index:2000; align-items:center; justify-content:center; padding:20px;">
-        <div style="background:#171333; border:1px solid rgba(255,255,255,0.15); border-radius:20px; max-width:440px; width:100%; padding:24px; box-shadow:0 15px 40px rgba(0,0,0,0.6); position:relative;">
-            <button onclick="closeDownloadModal()" style="position:absolute; top:16px; right:16px; background:none; border:none; color:#888; font-size:1.4em; cursor:pointer;">&times;</button>
-            <div style="display:flex; gap:14px; align-items:center; margin-bottom:18px;">
-                <img id="dlModalThumb" src="" style="width:60px; height:60px; border-radius:10px; object-fit:cover; background:#221e42;">
-                <div style="flex:1; min-width:0;">
-                    <div id="dlModalTitle" style="font-weight:700; font-size:1.05em; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Song Title</div>
-                    <div id="dlModalArtist" style="color:#9ba1b5; font-size:0.85em;">Artist</div>
-                </div>
-            </div>
-            <div style="font-size:0.88em; color:#bbb; margin-bottom:14px; font-weight:600;">Choose Download Server (100% Free):</div>
-            <div style="display:flex; flex-direction:column; gap:10px;">
-                <a id="dlOpt1" href="#" target="_blank" style="padding:12px 18px; border-radius:12px; background:linear-gradient(135deg, #11998e, #38ef7d); color:#fff; text-decoration:none; font-weight:700; font-size:0.92em; display:flex; justify-content:space-between; align-items:center;">
-                    <span>&#127911; Server 1: High-Speed MP3 (Y2Mate)</span>
-                    <span>&#11015;</span>
-                </a>
-                <a id="dlOpt2" href="#" target="_blank" style="padding:12px 18px; border-radius:12px; background:linear-gradient(135deg, #667eea, #764ba2); color:#fff; text-decoration:none; font-weight:700; font-size:0.92em; display:flex; justify-content:space-between; align-items:center;">
-                    <span>&#128190; Server 2: Clean Ad-Free (Cobalt)</span>
-                    <span>&#11015;</span>
-                </a>
-                <a id="dlOpt3" href="#" target="_blank" style="padding:12px 18px; border-radius:12px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:#fff; text-decoration:none; font-weight:600; font-size:0.9em; display:flex; justify-content:space-between; align-items:center;">
-                    <span>&#9889; Server 3: YTmp3 Converter</span>
-                    <span>&#11015;</span>
-                </a>
+<!-- DOWNLOAD MODAL -->
+<div id="downloadModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); z-index:2000; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:#171333; border:1px solid rgba(255,255,255,0.15); border-radius:20px; max-width:440px; width:100%; padding:24px; box-shadow:0 15px 40px rgba(0,0,0,0.6); position:relative;">
+        <button onclick="closeDownloadModal()" style="position:absolute; top:16px; right:16px; background:none; border:none; color:#888; font-size:1.4em; cursor:pointer;">&times;</button>
+        <div style="display:flex; gap:14px; align-items:center; margin-bottom:18px;">
+            <img id="dlModalThumb" src="" style="width:60px; height:60px; border-radius:10px; object-fit:cover; background:#221e42;">
+            <div style="flex:1; min-width:0;">
+                <div id="dlModalTitle" style="font-weight:700; font-size:1.05em; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Song Title</div>
+                <div id="dlModalArtist" style="color:#9ba1b5; font-size:0.85em;">Artist</div>
             </div>
         </div>
+        <div style="font-size:0.88em; color:#bbb; margin-bottom:14px; font-weight:600;">Choose Download Server (100% Free MP3):</div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            <a id="dlOpt1" href="#" target="_blank" style="padding:12px 18px; border-radius:12px; background:linear-gradient(135deg, #11998e, #38ef7d); color:#fff; text-decoration:none; font-weight:700; font-size:0.92em; display:flex; justify-content:space-between; align-items:center;">
+                <span>&#127911; Server 1: High-Speed MP3 (Y2Mate)</span>
+                <span>&#11015;</span>
+            </a>
+            <a id="dlOpt2" href="#" target="_blank" style="padding:12px 18px; border-radius:12px; background:linear-gradient(135deg, #667eea, #764ba2); color:#fff; text-decoration:none; font-weight:700; font-size:0.92em; display:flex; justify-content:space-between; align-items:center;">
+                <span>&#128190; Server 2: Clean Ad-Free (Cobalt)</span>
+                <span>&#11015;</span>
+            </a>
+            <a id="dlOpt3" href="#" target="_blank" style="padding:12px 18px; border-radius:12px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:#fff; text-decoration:none; font-weight:600; font-size:0.9em; display:flex; justify-content:space-between; align-items:center;">
+                <span>&#9889; Server 3: YTmp3 Converter</span>
+                <span>&#11015;</span>
+            </a>
+        </div>
     </div>
+</div>
 
 <!-- ==================== FIXED BOTTOM MUSIC PLAYER ==================== -->
 <div class="player-bar" id="playerBar">
@@ -633,7 +788,7 @@
     </div>
 </div>
 
-<!-- Invisible YouTube Player for 100% Full-Length Songs -->
+<!-- Hidden YouTube Audio Engine -->
 <div id="yt-player-container">
     <div id="yt-player"></div>
 </div>
@@ -645,15 +800,17 @@
     let currentIndex = -1;
     let isPlaying = false;
     let progressTimer = null;
+    let isRepeat = false;
+    let isShuffle = false;
+    let activePlaylistInfo = { title: '', author: '', total: 0 };
 
-    // Load custom user playlists from localStorage
     let myPlaylists = JSON.parse(localStorage.getItem('my_music_playlists') || '{"Favorites": []}');
 
     function savePlaylists() {
         localStorage.setItem('my_music_playlists', JSON.stringify(myPlaylists));
     }
 
-    // Initialize Privacy-Enhanced YouTube Player (Ad-Free Engine)
+    // Initialize Privacy-Enhanced YouTube Player
     window.onYouTubeIframeAPIReady = function() {
         ytPlayer = new YT.Player('yt-player', {
             host: 'https://www.youtube-nocookie.com',
@@ -675,26 +832,20 @@
         });
     };
 
-    // Auto Ad-Skip and Ad-Block Detection Engine
     function checkAndSkipAds() {
         if (!ytPlayer || !ytPlayer.getVideoData) return;
         try {
-            // Check if player is currently serving an ad
             const isAd = ytPlayer.getAdState && ytPlayer.getAdState() > 0;
             const duration = ytPlayer.getDuration ? ytPlayer.getDuration() : 0;
             const expectedDuration = currentQueue[currentIndex] ? currentQueue[currentIndex].duration : 0;
 
-            // If an ad is playing (indicated by adState or short ad duration compared to song duration)
             if (isAd || (duration > 0 && expectedDuration > 60 && duration < 35)) {
-                // Instantly fast-forward and skip past the ad
                 ytPlayer.setPlaybackRate(16);
                 ytPlayer.seekTo(duration + 1, true);
             } else {
                 ytPlayer.setPlaybackRate(1);
             }
-        } catch (e) {
-            // Continue
-        }
+        } catch (e) {}
     }
 
     function onPlayerStateChange(event) {
@@ -702,6 +853,7 @@
             isPlaying = true;
             document.getElementById('playPauseBtn').innerHTML = '&#9646;&#9646;';
             startProgressTracker();
+            updateQueueHighlight();
         } else if (event.data === YT.PlayerState.PAUSED) {
             isPlaying = false;
             document.getElementById('playPauseBtn').innerHTML = '&#9654;';
@@ -710,7 +862,13 @@
             isPlaying = false;
             document.getElementById('playPauseBtn').innerHTML = '&#9654;';
             stopProgressTracker();
-            if (currentIndex < currentQueue.length - 1) {
+
+            if (isRepeat) {
+                playSong(currentIndex);
+            } else if (isShuffle) {
+                const randomIdx = Math.floor(Math.random() * currentQueue.length);
+                playSong(randomIdx);
+            } else if (currentIndex < currentQueue.length - 1) {
                 nextSong();
             }
         }
@@ -720,10 +878,7 @@
         stopProgressTracker();
         progressTimer = setInterval(() => {
             if (!ytPlayer || !ytPlayer.getCurrentTime) return;
-            
-            // Continuously scan and eliminate ads
             checkAndSkipAds();
-
             const current = ytPlayer.getCurrentTime() || 0;
             const duration = ytPlayer.getDuration() || (currentQueue[currentIndex] ? currentQueue[currentIndex].duration : 0);
 
@@ -760,7 +915,7 @@
         const query = document.getElementById('searchInput').value.trim();
         if (!query) return;
 
-        closePlaylistDetail();
+        closePlaylistQueue();
 
         const btn = document.getElementById('searchBtn');
         const songsList = document.getElementById('songsList');
@@ -770,10 +925,9 @@
 
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner"></span>';
-        songsList.innerHTML = '<div class="empty-state"><span class="spinner"></span><p style="margin-top:10px">Searching full songs and playlists separately...</p></div>';
+        songsList.innerHTML = '<div class="empty-state"><span class="spinner"></span><p style="margin-top:10px">Searching songs and playlists separately...</p></div>';
 
         try {
-            // Search Invidious for BOTH: Videos (Full Songs) and Playlists
             const invidiousBase = 'https://invidious.f5.si';
 
             const [songsRes, playlistsRes] = await Promise.all([
@@ -791,11 +945,16 @@
                 playlistsGrid.innerHTML = playlists.slice(0, 8).map(pl => {
                     const thumb = pl.playlistThumbnail || (pl.videos && pl.videos[0] ? `https://i.ytimg.com/vi/${pl.videos[0].videoId}/hqdefault.jpg` : '');
                     return `
-                        <div class="playlist-card" onclick="openPlaylistDetail('${pl.playlistId}', '${escapeHtml(pl.title)}', '${escapeHtml(pl.author || 'Playlist')}', '${thumb}')">
-                            <img class="playlist-thumb" src="${thumb || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&h=200&fit=crop'}" alt="${escapeHtml(pl.title)}" onerror="this.src='https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&h=200&fit=crop'">
+                        <div class="playlist-card" onclick="openPlaylistQueue('${pl.playlistId}', '${escapeHtml(pl.title)}', '${escapeHtml(pl.author || 'Playlist')}')">
+                            <div class="playlist-thumb-box">
+                                <img class="playlist-thumb" src="${thumb || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&h=200&fit=crop'}" alt="${escapeHtml(pl.title)}" onerror="this.src='https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&h=200&fit=crop'">
+                                <div class="playlist-overlay-count">
+                                    <span style="font-size:1.3em;">&#9654;</span>
+                                    <span>${pl.videoCount || ''}</span>
+                                </div>
+                            </div>
                             <div class="playlist-name">${escapeHtml(pl.title)}</div>
                             <div class="playlist-author">${escapeHtml(pl.author || 'Playlist')}</div>
-                            <div class="playlist-tag">&#128191; ${pl.videoCount || 'Collection'} Tracks</div>
                         </div>
                     `;
                 }).join('');
@@ -803,10 +962,10 @@
                 playlistsSection.style.display = 'none';
             }
 
-            // 2. RENDER SEPARATE FULL SONGS SECTION
+            // 2. RENDER SEPARATE SONGS SECTION
             if (songs.length > 0) {
                 songsHeader.style.display = 'flex';
-                document.getElementById('songsCount').textContent = `${songs.length} full songs`;
+                document.getElementById('songsCount').textContent = `${songs.length} tracks`;
                 currentQueue = songs.map(s => {
                     const thumb = (s.videoThumbnails && s.videoThumbnails[0]) ? s.videoThumbnails[0].url : `https://i.ytimg.com/vi/${s.videoId}/hqdefault.jpg`;
                     return {
@@ -821,7 +980,7 @@
                 songsList.innerHTML = currentQueue.map((s, i) => renderSongCard(s, i, 'search')).join('');
             } else {
                 songsHeader.style.display = 'none';
-                songsList.innerHTML = '<div class="empty-state"><div class="icon">&#128533;</div><p>No full songs found. Try another search query.</p></div>';
+                songsList.innerHTML = '<div class="empty-state"><div class="icon">&#128533;</div><p>No songs found for this search.</p></div>';
             }
 
         } catch (e) {
@@ -832,11 +991,19 @@
         }
     }
 
-    // OPEN A SPECIFIC PLAYLIST TO VIEW ITS TRACKS SEPARATELY
-    async function openPlaylistDetail(playlistId, name, author, artwork) {
-        const container = document.getElementById('playlistDetailContainer');
-        container.style.display = 'block';
-        container.innerHTML = '<div class="empty-state"><span class="spinner"></span><p>Loading full songs in playlist...</p></div>';
+    // ========================================================
+    // OPEN PLAYLIST IN LINE-BY-LINE NUMBERED VIEW (MATCHING IMAGE)
+    // ========================================================
+    async function openPlaylistQueue(playlistId, title, author) {
+        const queueBox = document.getElementById('playlistQueueBox');
+        const queueTitle = document.getElementById('queueTitle');
+        const queueMeta = document.getElementById('queueMeta');
+        const queueList = document.getElementById('queueList');
+
+        queueBox.style.display = 'block';
+        queueTitle.textContent = title;
+        queueMeta.textContent = `${author} - Loading tracks...`;
+        queueList.innerHTML = '<div class="empty-state"><span class="spinner"></span><p style="margin-top:10px">Loading line-by-line playlist...</p></div>';
 
         window.scrollTo({ top: 120, behavior: 'smooth' });
 
@@ -844,7 +1011,14 @@
             const res = await fetch(`https://invidious.f5.si/api/v1/playlists/${playlistId}`).then(r => r.json());
             const videos = res.videos || [];
 
-            const playlistTracks = videos.map(v => {
+            if (videos.length === 0) {
+                queueList.innerHTML = '<div class="empty-state"><p>No songs found in this playlist.</p></div>';
+                return;
+            }
+
+            activePlaylistInfo = { title, author, total: videos.length };
+
+            currentQueue = videos.map(v => {
                 const thumb = (v.videoThumbnails && v.videoThumbnails[0]) ? v.videoThumbnails[0].url : `https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`;
                 return {
                     title: v.title || 'Unknown Title',
@@ -855,41 +1029,73 @@
                 };
             });
 
-            container.innerHTML = `
-                <div class="playlist-detail-banner">
-                    <img src="${artwork}" alt="${name}">
-                    <div class="playlist-detail-info">
-                        <div class="playlist-detail-title">${name}</div>
-                        <div class="playlist-detail-sub">${author} &bull; ${playlistTracks.length} Full Songs</div>
-                        <div class="banner-buttons">
-                            <button class="btn-play-all" onclick="playAllPlaylist(${JSON.stringify(playlistTracks).replace(/"/g, '&quot;')})">&#9654; Play All (${playlistTracks.length})</button>
-                            <button class="btn-back" onclick="closePlaylistDetail()">&#8592; Back to Results</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="section-header">
-                    <div class="section-title">&#127926; Full Songs in this Playlist</div>
-                </div>
-                <div class="song-list">
-                    ${playlistTracks.map((s, i) => renderSongCard(s, i, 'playlist', playlistTracks)).join('')}
-                </div>
-            `;
+            queueMeta.textContent = `${author} - 1 / ${currentQueue.length}`;
+
+            // Render Numbered Line-by-Line List
+            renderQueueItems();
+
+            // Auto-play first song in the playlist
+            playSong(0);
 
         } catch (e) {
-            container.innerHTML = `<div class="empty-state">Failed to load playlist: ${e.message}</div>`;
+            queueList.innerHTML = `<div class="empty-state">&#10060; Failed to load playlist: ${e.message}</div>`;
         }
     }
 
-    function closePlaylistDetail() {
-        const container = document.getElementById('playlistDetailContainer');
-        container.style.display = 'none';
-        container.innerHTML = '';
+    function renderQueueItems() {
+        const queueList = document.getElementById('queueList');
+        queueList.innerHTML = currentQueue.map((song, i) => `
+            <div class="queue-row ${i === currentIndex ? 'active' : ''}" id="qrow-${i}" onclick="playSong(${i})">
+                <div class="queue-num" id="qnum-${i}">${i === currentIndex ? '&#9654;' : (i + 1)}</div>
+                <div class="queue-thumb-box">
+                    <img class="queue-thumb-img" src="${song.artwork}" alt="${escapeHtml(song.title)}" onerror="this.src='https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&h=60&fit=crop'">
+                    <span class="queue-dur-badge">${formatDuration(song.duration)}</span>
+                </div>
+                <div class="queue-info">
+                    <div class="queue-track-title">${escapeHtml(song.title)}</div>
+                    <div class="queue-track-author">${escapeHtml(song.artist)}</div>
+                </div>
+                <div class="queue-row-actions" onclick="event.stopPropagation()">
+                    <button class="queue-btn-download" onclick='openDownloadModal(${JSON.stringify(song).replace(/'/g, "\\'")})' title="Download MP3">&#11015; MP3</button>
+                </div>
+            </div>
+        `).join('');
     }
 
-    function playAllPlaylist(tracks) {
-        if (!tracks || tracks.length === 0) return;
-        currentQueue = tracks;
-        playSong(0);
+    function updateQueueHighlight() {
+        if (currentQueue.length === 0) return;
+        document.querySelectorAll('.queue-row').forEach((row, i) => {
+            const isActive = (i === currentIndex);
+            row.classList.toggle('active', isActive);
+            const numEl = document.getElementById(`qnum-${i}`);
+            if (numEl) {
+                numEl.innerHTML = isActive ? '&#9654;' : (i + 1);
+            }
+        });
+
+        // Update counter e.g. "Author - 3 / 25"
+        if (activePlaylistInfo.total > 0) {
+            document.getElementById('queueMeta').textContent = `${activePlaylistInfo.author} - ${currentIndex + 1} / ${activePlaylistInfo.total}`;
+        }
+    }
+
+    function closePlaylistQueue() {
+        document.getElementById('playlistQueueBox').style.display = 'none';
+        activePlaylistInfo = { title: '', author: '', total: 0 };
+    }
+
+    function playAllQueue() {
+        if (currentQueue.length > 0) playSong(0);
+    }
+
+    function toggleRepeat() {
+        isRepeat = !isRepeat;
+        document.getElementById('repeatBtn').classList.toggle('active', isRepeat);
+    }
+
+    function toggleShuffle() {
+        isShuffle = !isShuffle;
+        document.getElementById('shuffleBtn').classList.toggle('active', isShuffle);
     }
 
     function renderSongCard(song, index, context = 'search', customList = null) {
@@ -932,17 +1138,12 @@
         if (ytPlayer && ytPlayer.loadVideoById) {
             ytPlayer.loadVideoById(song.videoId);
             ytPlayer.playVideo();
-        } else {
-            // If API still initializing, create iframe fallback
-            const iframe = document.getElementById('yt-player');
-            if (iframe) {
-                iframe.src = `https://www.youtube.com/embed/${song.videoId}?autoplay=1&enablejsapi=1`;
-            }
         }
 
         isPlaying = true;
         document.getElementById('playPauseBtn').innerHTML = '&#9646;&#9646;';
         startProgressTracker();
+        updateQueueHighlight();
     }
 
     function togglePlayPause() {
@@ -972,8 +1173,31 @@
         const rect = bar.getBoundingClientRect();
         const percent = (e.clientX - rect.left) / rect.width;
         const duration = ytPlayer.getDuration() || (currentQueue[currentIndex] ? currentQueue[currentIndex].duration : 0);
-        const seekToTime = percent * duration;
-        ytPlayer.seekTo(seekToTime, true);
+        ytPlayer.seekTo(percent * duration, true);
+    }
+
+    // ==================== DOWNLOAD MODAL ====================
+    function openDownloadModal(song) {
+        if (!song || !song.videoId) return;
+
+        document.getElementById('dlModalThumb').src = song.artwork || '';
+        document.getElementById('dlModalTitle').textContent = song.title || 'Song';
+        document.getElementById('dlModalArtist').textContent = song.artist || 'Artist';
+
+        const ytUrl = `https://www.youtube.com/watch?v=${song.videoId}`;
+
+        document.getElementById('dlOpt1').href = `https://www.y2mate.com/youtube/${song.videoId}`;
+        document.getElementById('dlOpt2').href = `https://cobalt.tools`;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(ytUrl).catch(() => {});
+        }
+        document.getElementById('dlOpt3').href = `https://ytmp3.nu/?url=${encodeURIComponent(ytUrl)}`;
+
+        document.getElementById('downloadModal').style.display = 'flex';
+    }
+
+    function closeDownloadModal() {
+        document.getElementById('downloadModal').style.display = 'none';
     }
 
     // ==================== USER CUSTOM PLAYLISTS ====================
@@ -984,7 +1208,7 @@
             return;
         }
 
-        const choice = prompt(`Add "${song.title}" to which playlist?\n\nAvailable Playlists:\n` + names.map((n, i) => `${i + 1}. ${n}`).join('\n') + `\n\nType playlist name:`, names[0]);
+        const choice = prompt(`Add "${song.title}" to which playlist?\n\nAvailable:\n` + names.map((n, i) => `${i + 1}. ${n}`).join('\n') + `\n\nType playlist name:`, names[0]);
         if (!choice) return;
 
         const target = choice.trim();
@@ -1026,10 +1250,15 @@
             const cover = songs.length > 0 ? songs[0].artwork : 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&h=300&fit=crop';
             return `
                 <div class="playlist-card" onclick="viewMyPlaylist('${escapeHtml(name)}')">
-                    <img class="playlist-thumb" src="${cover}" alt="${escapeHtml(name)}">
+                    <div class="playlist-thumb-box">
+                        <img class="playlist-thumb" src="${cover}" alt="${escapeHtml(name)}">
+                        <div class="playlist-overlay-count">
+                            <span style="font-size:1.3em;">&#9654;</span>
+                            <span>${songs.length}</span>
+                        </div>
+                    </div>
                     <div class="playlist-name">${escapeHtml(name)}</div>
                     <div class="playlist-author">${songs.length} Full Songs</div>
-                    <div class="playlist-tag">&#9835; My Playlist</div>
                 </div>
             `;
         }).join('');
@@ -1037,53 +1266,31 @@
 
     function viewMyPlaylist(name) {
         const songs = myPlaylists[name] || [];
-        const container = document.getElementById('myPlaylistSongsList');
-
         if (songs.length === 0) {
-            container.innerHTML = `<div class="empty-state"><p>Playlist "${name}" is empty. Search songs and click "+" to add them here!</p></div>`;
+            alert(`Playlist "${name}" is empty! Add songs to it using the "+" button.`);
             return;
         }
 
-        container.innerHTML = `
-            <div class="section-header" style="margin-top:20px;">
-                <div class="section-title">&#128194; ${name} (${songs.length} Full Songs)</div>
-                <button class="btn-play-all" onclick='playAllPlaylist(${JSON.stringify(songs).replace(/'/g, "\\'")})'>&#9654; Play All</button>
-            </div>
-            <div class="song-list">
-                ${songs.map((s, i) => renderSongCard(s, i, 'mypl', songs)).join('')}
-            </div>
-        `;
+        currentQueue = songs;
+        activePlaylistInfo = { title: name, author: 'My Playlist', total: songs.length };
+
+        const queueBox = document.getElementById('playlistQueueBox');
+        queueBox.style.display = 'block';
+        document.getElementById('queueTitle').textContent = name;
+        document.getElementById('queueMeta').textContent = `My Playlist - 1 / ${songs.length}`;
+
+        renderQueueItems();
+        playSong(0);
+
+        window.scrollTo({ top: 120, behavior: 'smooth' });
     }
 
-    // ==================== DOWNLOAD MODAL CONTROLLER ====================
-    function openDownloadModal(song) {
-        if (!song || !song.videoId) return;
-
-        document.getElementById('dlModalThumb').src = song.artwork || '';
-        document.getElementById('dlModalTitle').textContent = song.title || 'Song';
-        document.getElementById('dlModalArtist').textContent = song.artist || 'Artist';
-
-        const ytUrl = `https://www.youtube.com/watch?v=${song.videoId}`;
-
-        // Server 1: Y2Mate Direct Preloaded
-        document.getElementById('dlOpt1').href = `https://www.y2mate.com/youtube/${song.videoId}`;
-
-        // Server 2: Cobalt (Clean, Ad-Free open-source MP3 downloader)
-        document.getElementById('dlOpt2').href = `https://cobalt.tools`;
-        // Copy to clipboard for instant pasting on mobile or PC
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(ytUrl).catch(() => {});
-        }
-
-        // Server 3: YTmp3 converter
-        document.getElementById('dlOpt3').href = `https://ytmp3.nu/?url=${encodeURIComponent(ytUrl)}`;
-
-        const modal = document.getElementById('downloadModal');
-        modal.style.display = 'flex';
-    }
-
-    function closeDownloadModal() {
-        document.getElementById('downloadModal').style.display = 'none';
+    function formatDuration(sec) {
+        if (!sec || isNaN(sec)) return '0:00';
+        sec = Math.floor(sec);
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        return `${m}:${s.toString().padStart(2, '0')}`;
     }
 
     function escapeHtml(text) {
@@ -1092,9 +1299,8 @@
         return div.innerHTML;
     }
 
-    // Auto-search default on load
     window.addEventListener('DOMContentLoaded', () => {
-        quickSearch('Manithan Aval song');
+        quickSearch('Kannada Best Melody Songs playlist');
     });
 </script>
 
