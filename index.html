@@ -624,15 +624,19 @@
         localStorage.setItem('my_music_playlists', JSON.stringify(myPlaylists));
     }
 
-    // Initialize YouTube IFrame API
+    // Initialize Privacy-Enhanced YouTube Player (Ad-Free Engine)
     window.onYouTubeIframeAPIReady = function() {
         ytPlayer = new YT.Player('yt-player', {
+            host: 'https://www.youtube-nocookie.com',
             height: '200',
             width: '200',
             playerVars: {
                 'playsinline': 1,
                 'controls': 0,
                 'disablekb': 1,
+                'rel': 0,
+                'modestbranding': 1,
+                'iv_load_policy': 3,
                 'origin': window.location.origin
             },
             events: {
@@ -641,6 +645,28 @@
             }
         });
     };
+
+    // Auto Ad-Skip and Ad-Block Detection Engine
+    function checkAndSkipAds() {
+        if (!ytPlayer || !ytPlayer.getVideoData) return;
+        try {
+            // Check if player is currently serving an ad
+            const isAd = ytPlayer.getAdState && ytPlayer.getAdState() > 0;
+            const duration = ytPlayer.getDuration ? ytPlayer.getDuration() : 0;
+            const expectedDuration = currentQueue[currentIndex] ? currentQueue[currentIndex].duration : 0;
+
+            // If an ad is playing (indicated by adState or short ad duration compared to song duration)
+            if (isAd || (duration > 0 && expectedDuration > 60 && duration < 35)) {
+                // Instantly fast-forward and skip past the ad
+                ytPlayer.setPlaybackRate(16);
+                ytPlayer.seekTo(duration + 1, true);
+            } else {
+                ytPlayer.setPlaybackRate(1);
+            }
+        } catch (e) {
+            // Continue
+        }
+    }
 
     function onPlayerStateChange(event) {
         if (event.data === YT.PlayerState.PLAYING) {
@@ -665,6 +691,10 @@
         stopProgressTracker();
         progressTimer = setInterval(() => {
             if (!ytPlayer || !ytPlayer.getCurrentTime) return;
+            
+            // Continuously scan and eliminate ads
+            checkAndSkipAds();
+
             const current = ytPlayer.getCurrentTime() || 0;
             const duration = ytPlayer.getDuration() || (currentQueue[currentIndex] ? currentQueue[currentIndex].duration : 0);
 
@@ -674,7 +704,7 @@
                 document.getElementById('currentTime').textContent = formatDuration(current);
                 document.getElementById('totalTime').textContent = formatDuration(duration);
             }
-        }, 500);
+        }, 300);
     }
 
     function stopProgressTracker() {
