@@ -580,6 +580,35 @@
     </div>
 </div>
 
+    <!-- DOWNLOAD MODAL -->
+    <div id="downloadModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); z-index:2000; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:#171333; border:1px solid rgba(255,255,255,0.15); border-radius:20px; max-width:440px; width:100%; padding:24px; box-shadow:0 15px 40px rgba(0,0,0,0.6); position:relative;">
+            <button onclick="closeDownloadModal()" style="position:absolute; top:16px; right:16px; background:none; border:none; color:#888; font-size:1.4em; cursor:pointer;">&times;</button>
+            <div style="display:flex; gap:14px; align-items:center; margin-bottom:18px;">
+                <img id="dlModalThumb" src="" style="width:60px; height:60px; border-radius:10px; object-fit:cover; background:#221e42;">
+                <div style="flex:1; min-width:0;">
+                    <div id="dlModalTitle" style="font-weight:700; font-size:1.05em; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Song Title</div>
+                    <div id="dlModalArtist" style="color:#9ba1b5; font-size:0.85em;">Artist</div>
+                </div>
+            </div>
+            <div style="font-size:0.88em; color:#bbb; margin-bottom:14px; font-weight:600;">Choose Download Server (100% Free):</div>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <a id="dlOpt1" href="#" target="_blank" style="padding:12px 18px; border-radius:12px; background:linear-gradient(135deg, #11998e, #38ef7d); color:#fff; text-decoration:none; font-weight:700; font-size:0.92em; display:flex; justify-content:space-between; align-items:center;">
+                    <span>&#127911; Server 1: High-Speed MP3 (Y2Mate)</span>
+                    <span>&#11015;</span>
+                </a>
+                <a id="dlOpt2" href="#" target="_blank" style="padding:12px 18px; border-radius:12px; background:linear-gradient(135deg, #667eea, #764ba2); color:#fff; text-decoration:none; font-weight:700; font-size:0.92em; display:flex; justify-content:space-between; align-items:center;">
+                    <span>&#128190; Server 2: Clean Ad-Free (Cobalt)</span>
+                    <span>&#11015;</span>
+                </a>
+                <a id="dlOpt3" href="#" target="_blank" style="padding:12px 18px; border-radius:12px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:#fff; text-decoration:none; font-weight:600; font-size:0.9em; display:flex; justify-content:space-between; align-items:center;">
+                    <span>&#9889; Server 3: YTmp3 Converter</span>
+                    <span>&#11015;</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
 <!-- ==================== FIXED BOTTOM MUSIC PLAYER ==================== -->
 <div class="player-bar" id="playerBar">
     <div class="player-progress-bar" id="progressBar" onclick="seekAudio(event)">
@@ -875,7 +904,7 @@
                 <div class="actions-group">
                     <button class="btn-play" onclick='handlePlayClick(${index}, ${customList ? JSON.stringify(customList).replace(/'/g, "\\'") : "null"})' title="Play Full Song">&#9654;</button>
                     <button class="btn-add-pl" onclick='promptAddToPlaylist(${JSON.stringify(song).replace(/'/g, "\\'")})' title="Add to Playlist">+</button>
-                    <a class="btn-download" href="https://loader.to/api/card/?url=https://www.youtube.com/watch?v=${song.videoId}" target="_blank" title="Download Full MP3">&#11015; MP3</a>
+                    <button class="btn-download" onclick='openDownloadModal(${JSON.stringify(song).replace(/'/g, "\\'")})' title="Download Full MP3">&#11015; MP3</button>
                 </div>
             </div>
         `;
@@ -1026,12 +1055,35 @@
         `;
     }
 
-    function formatDuration(sec) {
-        if (!sec || isNaN(sec)) return '0:00';
-        sec = Math.floor(sec);
-        const m = Math.floor(sec / 60);
-        const s = sec % 60;
-        return `${m}:${s.toString().padStart(2, '0')}`;
+    // ==================== DOWNLOAD MODAL CONTROLLER ====================
+    function openDownloadModal(song) {
+        if (!song || !song.videoId) return;
+
+        document.getElementById('dlModalThumb').src = song.artwork || '';
+        document.getElementById('dlModalTitle').textContent = song.title || 'Song';
+        document.getElementById('dlModalArtist').textContent = song.artist || 'Artist';
+
+        const ytUrl = `https://www.youtube.com/watch?v=${song.videoId}`;
+
+        // Server 1: Y2Mate Direct Preloaded
+        document.getElementById('dlOpt1').href = `https://www.y2mate.com/youtube/${song.videoId}`;
+
+        // Server 2: Cobalt (Clean, Ad-Free open-source MP3 downloader)
+        document.getElementById('dlOpt2').href = `https://cobalt.tools`;
+        // Copy to clipboard for instant pasting on mobile or PC
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(ytUrl).catch(() => {});
+        }
+
+        // Server 3: YTmp3 converter
+        document.getElementById('dlOpt3').href = `https://ytmp3.nu/?url=${encodeURIComponent(ytUrl)}`;
+
+        const modal = document.getElementById('downloadModal');
+        modal.style.display = 'flex';
+    }
+
+    function closeDownloadModal() {
+        document.getElementById('downloadModal').style.display = 'none';
     }
 
     function escapeHtml(text) {
