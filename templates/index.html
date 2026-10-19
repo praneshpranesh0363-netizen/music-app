@@ -1176,32 +1176,14 @@
             <button class="search-submit" id="searchBtn" onclick="performSearch()">🔍 Search</button>
         </div>
 
-        <!-- ======================================================== -->
-        <!-- PANEL 1: PLAYLIST SELECTION PAGE                         -->
-        <!-- ======================================================== -->
-        <div id="playlistSelectionPanel" class="playlist-selection-panel">
-            <div class="playlists-section-title">
-                <div style="display:flex; align-items:center; gap:8px;">
-                    <span>📁</span>
-                    <span>Playlists</span>
-                </div>
-                <button class="queue-icon-btn" onclick="openFlowDiagramModal()" title="View Architecture Flowchart" style="font-size:0.85em; padding:4px 10px;">📊 Flow Diagram</button>
-            </div>
-            <div class="playlist-select-list" id="playlistSelectList">
-                <!-- Populated dynamically via JS -->
-            </div>
-        </div>
-
-        <!-- ======================================================== -->
-        <!-- PANEL 2: PLAYLIST SONGS (EACH SONG SEPARATE)             -->
-        <!-- ======================================================== -->
+        <!-- LINE-BY-LINE NUMBERED SONGS VIEW (ONLY APPEARS AFTER USER SEARCHES) -->
         <div id="playlistQueueBox" class="playlist-queue-box" style="display:none;">
             <div class="queue-header">
                 <div class="queue-top-row" style="align-items:center;">
-                    <button class="btn-back-playlists" onclick="backToPlaylistSelection()" title="Back to Playlists">←</button>
+                    <button class="btn-back-playlists" onclick="clearSearchResults()" title="Clear and back to search bar" style="font-size:1.1em; width:34px; height:34px;">✕</button>
                     <div style="flex:1; min-width:0; padding:0 12px;">
-                        <div class="queue-title" id="queueTitle">Playlist Songs</div>
-                        <div class="queue-meta" id="queueMeta" style="margin:2px 0 0 0;">Select to play or download</div>
+                        <div class="queue-title" id="queueTitle">Search Results</div>
+                        <div class="queue-meta" id="queueMeta" style="margin:2px 0 0 0;">Songs list</div>
                     </div>
                 </div>
                 <div class="queue-actions-row" style="margin-top:10px;">
@@ -1212,10 +1194,10 @@
                 </div>
             </div>
 
-            <!-- In-Playlist Search (Panel 2 from Diagram) -->
-            <div class="within-playlist-container">
+            <!-- In-Playlist Search Filter (Shown when songs are loaded) -->
+            <div class="within-playlist-container" id="withinSearchContainer" style="display:none;">
                 <input type="text" id="withinPlaylistInput" class="within-playlist-input"
-                       placeholder="🔍 Search within playlist..."
+                       placeholder="🔍 Search within playlist / songs..."
                        oninput="filterCurrentPlaylistSongs(this.value)">
             </div>
 
@@ -1743,73 +1725,20 @@
         performSearch();
     }
 
-    // ==================== PANEL 1: FEATURED PLAYLISTS ====================
-    const FEATURED_PLAYLISTS = [
-        {
-            title: "Tamil Hits",
-            count: "50 songs",
-            query: "Tamil Hits playlist",
-            cover: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=160&h=160&fit=crop"
-        },
-        {
-            title: "Love Songs",
-            count: "45 songs",
-            query: "Love Songs romantic playlist",
-            cover: "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=160&h=160&fit=crop"
-        },
-        {
-            title: "Top 50",
-            count: "50 songs",
-            query: "Top 50 songs playlist",
-            cover: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=160&h=160&fit=crop"
-        },
-        {
-            title: "Arijit Singh",
-            count: "35 songs",
-            query: "Arijit Singh playlist",
-            cover: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=160&h=160&fit=crop"
-        },
-        {
-            title: "Kannada Best Melody Songs",
-            count: "50 songs",
-            query: "Kannada Best Melody Songs playlist",
-            cover: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=160&h=160&fit=crop"
-        },
-        {
-            title: "Anirudh Ravichander Hits",
-            count: "40 songs",
-            query: "Anirudh Ravichander playlist",
-            cover: "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=160&h=160&fit=crop"
+    function clearSearchResults() {
+        const queueBox = document.getElementById('playlistQueueBox');
+        if (queueBox) queueBox.style.display = 'none';
+        const withinCont = document.getElementById('withinSearchContainer');
+        if (withinCont) withinCont.style.display = 'none';
+        const input = document.getElementById('searchInput');
+        if (input) {
+            input.value = '';
+            input.focus();
         }
-    ];
-
-    function renderFeaturedPlaylists() {
-        const container = document.getElementById('playlistSelectList');
-        if (!container) return;
-        container.innerHTML = FEATURED_PLAYLISTS.map((pl, idx) => `
-            <div class="playlist-select-card" onclick="selectFeaturedPlaylist(${idx})">
-                <img class="playlist-select-img" src="${pl.cover}" alt="${escapeHtml(pl.title)}" onerror="this.src='https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=120&h=120&fit=crop'">
-                <div class="playlist-select-details">
-                    <div class="playlist-select-name">${escapeHtml(pl.title)}</div>
-                    <div class="playlist-select-count">${escapeHtml(pl.count)}</div>
-                </div>
-                <div class="playlist-select-arrow">&rsaquo;</div>
-            </div>
-        `).join('');
-    }
-
-    function selectFeaturedPlaylist(idx) {
-        const pl = FEATURED_PLAYLISTS[idx];
-        if (!pl) return;
-        document.getElementById('searchInput').value = pl.query;
-        switchToPlaylistView(pl.title, pl.count);
-        performSearch(pl.query, pl.title);
     }
 
     function switchToPlaylistView(title, count) {
-        const selPanel = document.getElementById('playlistSelectionPanel');
         const queueBox = document.getElementById('playlistQueueBox');
-        if (selPanel) selPanel.style.display = 'none';
         if (queueBox) queueBox.style.display = 'block';
 
         const withinInput = document.getElementById('withinPlaylistInput');
@@ -1817,14 +1746,6 @@
 
         if (title) document.getElementById('queueTitle').textContent = title;
         if (count) document.getElementById('queueMeta').textContent = `${count} • 100% Ad-Free • In-Page Downloads`;
-    }
-
-    function backToPlaylistSelection() {
-        const selPanel = document.getElementById('playlistSelectionPanel');
-        const queueBox = document.getElementById('playlistQueueBox');
-        if (selPanel) selPanel.style.display = 'block';
-        if (queueBox) queueBox.style.display = 'none';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function filterCurrentPlaylistSongs(filterText) {
@@ -1948,7 +1869,9 @@
         queueTitle.textContent = displayTitle;
         activePlaylistInfo = { title: displayTitle, author: 'Playlist Songs', total: songs.length };
         currentQueue = songs;
-        queueMeta.textContent = `${currentQueue.length} songs in playlist • 100% Ad-Free • In-Page Downloads`;
+        queueMeta.textContent = `${currentQueue.length} songs found • 100% Ad-Free • In-Page Downloads`;
+        const withinCont = document.getElementById('withinSearchContainer');
+        if (withinCont) withinCont.style.display = 'block';
         renderQueueItems(currentQueue);
 
         btn.disabled = false;
@@ -2680,7 +2603,6 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-        renderFeaturedPlaylists();
         const input = document.getElementById('searchInput');
         if (input) {
             input.value = '';
