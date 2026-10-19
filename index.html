@@ -1154,8 +1154,8 @@
 </head>
 <body>
 
-<!-- Hidden Native Audio Engine for 100% Ad-Free Audio -->
-<audio id="nativeAudio" preload="auto" playsinline></audio>
+<!-- Hidden Native Audio Engine for 100% Ad-Free Audio (Optimized for Lock-Screen & Background Playback) -->
+<audio id="nativeAudio" preload="auto" playsinline webkit-playsinline="true" x-webkit-airplay="allow"></audio>
 <div id="yt-player-box" style="position:fixed; bottom:0; right:0; width:1px; height:1px; opacity:0.01; pointer-events:none;"><div id="yt-player"></div></div>
 
 <!-- Toast for In-Page Status & Feedback -->
@@ -2002,12 +2002,120 @@
         showToast(isShuffle ? '🔀 Shuffle: ON' : '🔀 Shuffle: OFF');
     }
 
-    // ==================== 100% AD-FREE AUDIO ENGINE WITH DUAL FALLBACK ====================
+    // ==================== BACKGROUND AUDIO ENGINE & LOCK-SCREEN MEDIASESSION ====================
+    let backgroundAudioCtx = null;
+    let isPreloadingNext = false;
+
+    function ensureBackgroundAudioSession() {
+        try {
+            if (!backgroundAudioCtx) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) {
+                    backgroundAudioCtx = new AudioCtx();
+                    // Connect silent oscillator to acquire OS audio focus
+                    const osc = backgroundAudioCtx.createOscillator();
+                    const gain = backgroundAudioCtx.createGain();
+                    gain.gain.value = 0.0001;
+                    osc.connect(gain);
+                    gain.connect(backgroundAudioCtx.destination);
+                    osc.start(0);
+                }
+            }
+            if (backgroundAudioCtx && backgroundAudioCtx.state === 'suspended') {
+                backgroundAudioCtx.resume();
+            }
+        } catch(e) {
+            console.log("AudioContext session note:", e);
+        }
+    }
+
+    function updateMediaSession(song) {
+        if (!('mediaSession' in navigator)) return;
+        try {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: song.title || 'Music Track',
+                artist: song.artist || 'Ad-Free Music',
+                album: 'Music Zone',
+                artwork: [
+                    { src: song.artwork, sizes: '96x96', type: 'image/jpeg' },
+                    { src: song.artwork, sizes: '128x128', type: 'image/jpeg' },
+                    { src: song.artwork, sizes: '256x256', type: 'image/jpeg' },
+                    { src: song.artwork, sizes: '512x512', type: 'image/jpeg' }
+                ]
+            });
+            navigator.mediaSession.playbackState = 'playing';
+
+            navigator.mediaSession.setActionHandler('play', () => togglePlayPause());
+            navigator.mediaSession.setActionHandler('pause', () => togglePlayPause());
+            navigator.mediaSession.setActionHandler('previoustrack', () => prevSong());
+            navigator.mediaSession.setActionHandler('nexttrack', () => nextSong());
+            navigator.mediaSession.setActionHandler('seekbackward', (details) => {
+                const skip = details.seekOffset || 10;
+                nativeAudio.currentTime = Math.max(0, nativeAudio.currentTime - skip);
+            });
+            navigator.mediaSession.setActionHandler('seekforward', (details) => {
+                const skip = details.seekOffset || 10;
+                nativeAudio.currentTime = Math.min(nativeAudio.duration, nativeAudio.currentTime + skip);
+            });
+            navigator.mediaSession.setActionHandler('seekto', (details) => {
+                if (details.seekTime !== undefined) {
+                    nativeAudio.currentTime = details.seekTime;
+                }
+            });
+        } catch(e) {
+            console.warn("MediaSession update error:", e);
+        }
+    }
+
+    async function preloadNextTrackStream() {
+        if (isPreloadingNext || currentQueue.length === 0) return;
+        const nextIdx = isShuffle ? Math.floor(Math.random() * currentQueue.length) : (currentIndex + 1);
+        if (nextIdx >= currentQueue.length || !currentQueue[nextIdx]) return;
+        const nextSong = currentQueue[nextIdx];
+        if (streamCache[nextSong.videoId]) return;
+
+        isPreloadingNext = true;
+        try {
+            const backendBase = (typeof getBackendBase === 'function') ? getBackendBase() : '';
+            const res = await fetch(`${backendBase}/api/stream`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: nextSong.videoId })
+            }).then(r => r.json());
+            if (res && res.stream_url) {
+                streamCache[nextSong.videoId] = res.stream_url;
+            }
+        } catch(e) {}
+        finally {
+            isPreloadingNext = false;
+        }
+    }
+
+    // Keep music playing when user leaves website or locks phone screen
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            // User minimized or locked phone: keep mediaSession in playing state
+            if (isPlaying && nativeAudio && !nativeAudio.paused) {
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.playbackState = 'playing';
+                }
+            }
+        } else {
+            // Returned to tab: sync UI play state
+            if (isPlaying && nativeAudio && !nativeAudio.paused) {
+                document.getElementById('playPauseBtn').innerHTML = '&#9646;&#9646;';
+            }
+        }
+    });
+
     async function playSong(index) {
         const song = currentQueue[index];
         if (!song || !song.videoId) return;
 
         currentIndex = index;
+
+        // Activate background audio session for lock-screen & out-of-browser playback
+        ensureBackgroundAudioSession();
 
         document.getElementById('playerBar').classList.add('active');
         document.getElementById('playerTitle').textContent = song.title;
@@ -2017,7 +2125,7 @@
 
         updateQueueHighlight();
 
-        showToast(`🎵 Streaming "${song.title}" (Ad-Free)...`);
+        showToast(`🎵 Streaming "${song.title}" (Ad-Free & Background Active)...`);
 
         try {
             isYtFallback = false;
@@ -2057,18 +2165,8 @@
                 isPlaying = true;
                 document.getElementById('playPauseBtn').innerHTML = '&#9646;&#9646;';
 
-                // MediaSession Lock-Screen Controls
-                if ('mediaSession' in navigator) {
-                    navigator.mediaSession.metadata = new MediaMetadata({
-                        title: song.title,
-                        artist: song.artist,
-                        artwork: [{ src: song.artwork, sizes: '512x512', type: 'image/jpeg' }]
-                    });
-                    navigator.mediaSession.setActionHandler('play', () => togglePlayPause());
-                    navigator.mediaSession.setActionHandler('pause', () => togglePlayPause());
-                    navigator.mediaSession.setActionHandler('previoustrack', () => prevSong());
-                    navigator.mediaSession.setActionHandler('nexttrack', () => nextSong());
-                }
+                // Complete MediaSession Lock-Screen Controls
+                updateMediaSession(song);
             } else {
                 throw new Error("No direct stream");
             }
@@ -2094,6 +2192,22 @@
             document.getElementById('progressFill').style.width = percent + '%';
             document.getElementById('currentTime').textContent = formatDuration(current);
             document.getElementById('totalTime').textContent = formatDuration(duration);
+
+            // Keep lock-screen progress bar in sync
+            if ('setPositionState' in navigator.mediaSession && !isNaN(duration) && duration > 0) {
+                try {
+                    navigator.mediaSession.setPositionState({
+                        duration: duration,
+                        playbackRate: nativeAudio.playbackRate || 1,
+                        position: Math.min(current, duration)
+                    });
+                } catch(e) {}
+            }
+
+            // Preload next track when 65% finished for seamless background lock-screen playback
+            if (percent > 65) {
+                preloadNextTrackStream();
+            }
         }
     });
 
@@ -2115,11 +2229,13 @@
                 isPlaying = false;
                 stopAdShield();
                 document.getElementById('playPauseBtn').innerHTML = '&#9654;';
+                if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
             } else {
                 ytPlayer.playVideo();
                 isPlaying = true;
                 startAdShield();
                 document.getElementById('playPauseBtn').innerHTML = '&#9646;&#9646;';
+                if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
             }
             return;
         }
@@ -2129,10 +2245,13 @@
             nativeAudio.pause();
             isPlaying = false;
             document.getElementById('playPauseBtn').innerHTML = '&#9654;';
+            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
         } else {
+            ensureBackgroundAudioSession();
             nativeAudio.play();
             isPlaying = true;
             document.getElementById('playPauseBtn').innerHTML = '&#9646;&#9646;';
+            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
         }
     }
 
@@ -2188,40 +2307,25 @@
         }
 
         if (saveBtn) {
-            saveBtn.textContent = '✓ Save MP3 to Phone';
+            saveBtn.textContent = '💾 Save to Laptop / Phone';
             saveBtn.style.background = 'linear-gradient(135deg, #11998e, #38ef7d)';
             saveBtn.onclick = function() {
-                triggerNativeDownload(currentDownloadedFileUrl || fileUrl, cleanName);
+                triggerNativeDownload(fileUrl, cleanName);
             };
         }
 
-        // Convert to local Blob URL for 100% same-origin mobile download
-        try {
-            const resp = await fetch(fileUrl);
-            if (resp.ok) {
-                const blob = await resp.blob();
-                const blobUrl = URL.createObjectURL(blob);
-                currentDownloadedFileUrl = blobUrl;
-                if (directBtn) {
-                    directBtn.href = blobUrl;
-                }
-                triggerNativeDownload(blobUrl, cleanName);
-                return;
-            }
-        } catch (e) {
-            console.log("Direct blob creation skipped, using native fileUrl:", e);
-        }
-
-        // Direct fallback trigger
+        // Trigger immediate native download
         triggerNativeDownload(fileUrl, cleanName);
     }
 
     function triggerNativeDownload(fileUrl, filename) {
+        if (!fileUrl) return;
+
+        // Method 1: Invisible direct anchor trigger
         try {
             const a = document.createElement('a');
             a.href = fileUrl;
-            a.download = filename;
-            // No target='_blank' - keeps user strictly on the same page
+            a.setAttribute('download', filename);
             a.style.display = 'none';
             document.body.appendChild(a);
             a.click();
@@ -2229,22 +2333,20 @@
                 if (a.parentNode) a.parentNode.removeChild(a);
             }, 3000);
         } catch(e) {
-            console.warn("Trigger download failed:", e);
+            console.warn("Anchor trigger error:", e);
         }
 
-        // Silent iframe download trigger for browsers blocking synthetic anchor clicks
-        if (!fileUrl.startsWith('blob:')) {
-            try {
-                let ifr = document.getElementById('hiddenDownloadIframe');
-                if (!ifr) {
-                    ifr = document.createElement('iframe');
-                    ifr.id = 'hiddenDownloadIframe';
-                    ifr.style.display = 'none';
-                    document.body.appendChild(ifr);
-                }
-                ifr.src = fileUrl;
-            } catch(e) {}
-        }
+        // Method 2: Hidden iframe download trigger (works in background on mobile & desktop)
+        try {
+            let ifr = document.getElementById('hiddenDownloadIframe');
+            if (!ifr) {
+                ifr = document.createElement('iframe');
+                ifr.id = 'hiddenDownloadIframe';
+                ifr.style.display = 'none';
+                document.body.appendChild(ifr);
+            }
+            ifr.src = fileUrl;
+        } catch(e) {}
     }
 
     function startDownloadFlow(videoId, songTitle, artist, thumb) {
