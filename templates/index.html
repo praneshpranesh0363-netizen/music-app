@@ -993,7 +993,8 @@
         <div class="search-container">
             <input type="text" id="searchInput" class="search-input"
                    placeholder="Search any song, artist, album, or playlist..."
-                   value="Kannada Best Melody Songs playlist"
+                   value=""
+                   autocomplete="off"
                    onkeypress="if(event.key==='Enter') performSearch()">
             <button class="search-submit" id="searchBtn" onclick="performSearch()">🔍 Search</button>
         </div>
@@ -1002,9 +1003,9 @@
         <div id="playlistQueueBox" class="playlist-queue-box">
             <div class="queue-header">
                 <div class="queue-top-row">
-                    <div class="queue-title" id="queueTitle">Kannada Best Melody Songs Playlist</div>
+                    <div class="queue-title" id="queueTitle">Music Search Results</div>
                 </div>
-                <div class="queue-meta" id="queueMeta">Loading songs...</div>
+                <div class="queue-meta" id="queueMeta">Type any song or playlist above to start</div>
                 <div class="queue-actions-row">
                     <button class="btn-play-all" onclick="playAllQueue()">▶ Play All</button>
                     <button class="queue-icon-btn" id="repeatBtn" onclick="toggleRepeat()" title="Repeat">🔁 Repeat</button>
@@ -1014,7 +1015,10 @@
             </div>
             <!-- Numbered Line-by-Line Songs List -->
             <div class="queue-list" id="queueList">
-                <div class="empty-state"><span class="spinner"></span><p style="margin-top:10px">Loading songs...</p></div>
+                <div class="empty-state">
+                    <p style="font-size:1.05em; color:#9ba1b5; margin-bottom:6px;">🔍 Enter any song, singer, or playlist in the search bar above.</p>
+                    <p style="font-size:0.85em; color:#6f758d;">Results will appear line-by-line with 1-click Play and MP3 Download.</p>
+                </div>
             </div>
         </div>
     </div>
@@ -2342,7 +2346,11 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-        quickSearch('Kannada Best Melody Songs playlist');
+        const input = document.getElementById('searchInput');
+        if (input) {
+            input.value = '';
+            input.focus();
+        }
     });
 </script>
 
