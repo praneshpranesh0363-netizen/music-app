@@ -1276,10 +1276,18 @@
         </div>
 
         <div class="dl-step-item" id="step3Item">
-            <div class="dl-step-icon" id="step3Icon">📁</div>
+            <div class="dl-step-icon" id="step3Icon">⚡</div>
             <div style="flex:1;">
                 <div class="dl-step-text-title">3. Save as MP3 File</div>
-                <div class="dl-step-text-sub" id="step3Sub">Writing audio data directly to device storage</div>
+                <div class="dl-step-text-sub" id="step3Sub">Converting and writing audio data</div>
+            </div>
+        </div>
+
+        <div class="dl-step-item" id="step4Item">
+            <div class="dl-step-icon" id="step4Icon">📁</div>
+            <div style="flex:1;">
+                <div class="dl-step-text-title">4. Complete &amp; Saved</div>
+                <div class="dl-step-text-sub" id="step4Sub">Ready in your Downloads folder</div>
             </div>
         </div>
 
@@ -2331,11 +2339,16 @@
     function triggerNativeDownload(fileUrl, filename) {
         if (!fileUrl) return;
 
+        // 1. Offscreen anchor trigger (standard across desktop and modern mobile)
         try {
             const a = document.createElement('a');
             a.href = fileUrl;
             a.setAttribute('download', filename || 'song.mp3');
-            a.style.display = 'none';
+            a.setAttribute('target', '_self');
+            a.style.position = 'fixed';
+            a.style.top = '-9999px';
+            a.style.left = '-9999px';
+            a.style.opacity = '0';
             document.body.appendChild(a);
             a.click();
             setTimeout(() => {
@@ -2343,6 +2356,25 @@
             }, 3000);
         } catch(e) {
             console.warn("Anchor trigger error:", e);
+        }
+
+        // 2. Hidden iframe fallback (ensures mobile Chrome & Safari trigger download without navigating away)
+        try {
+            let ifr = document.getElementById('hiddenDownloadIframe');
+            if (!ifr) {
+                ifr = document.createElement('iframe');
+                ifr.id = 'hiddenDownloadIframe';
+                ifr.style.position = 'fixed';
+                ifr.style.top = '-9999px';
+                ifr.style.left = '-9999px';
+                ifr.style.width = '1px';
+                ifr.style.height = '1px';
+                ifr.style.border = 'none';
+                document.body.appendChild(ifr);
+            }
+            ifr.src = fileUrl;
+        } catch(e) {
+            console.warn("Iframe trigger error:", e);
         }
     }
 
@@ -2354,14 +2386,18 @@
 
         const defaultThumb = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=120&h=120&fit=crop';
         const imgEl = document.getElementById('dlTrackThumb');
-        imgEl.onerror = function() {
-            this.onerror = null;
-            this.src = defaultThumb;
-        };
-        imgEl.src = song.artwork || thumb || defaultThumb;
+        if (imgEl) {
+            imgEl.onerror = function() {
+                this.onerror = null;
+                this.src = defaultThumb;
+            };
+            imgEl.src = song.artwork || thumb || defaultThumb;
+        }
 
-        document.getElementById('dlTrackTitle').textContent = song.title || songTitle || 'Song';
-        document.getElementById('dlTrackArtist').textContent = song.artist || artist || 'Artist';
+        const titleEl = document.getElementById('dlTrackTitle');
+        if (titleEl) titleEl.textContent = song.title || songTitle || 'Song';
+        const artistEl = document.getElementById('dlTrackArtist');
+        if (artistEl) artistEl.textContent = song.artist || artist || 'Artist';
 
         const directBtn = document.getElementById('directMp3LinkBtn');
         if (directBtn) directBtn.style.display = 'none';
@@ -2377,9 +2413,12 @@
 
         // Reset step states
         setDownloadStep(1);
-        document.getElementById('dlProgressFill').style.width = '0%';
-        document.getElementById('dlPercentLabel').textContent = '0%';
-        document.getElementById('downloadModal').style.display = 'flex';
+        const fillEl = document.getElementById('dlProgressFill');
+        if (fillEl) fillEl.style.width = '0%';
+        const pctEl = document.getElementById('dlPercentLabel');
+        if (pctEl) pctEl.textContent = '0%';
+        const modalEl = document.getElementById('downloadModal');
+        if (modalEl) modalEl.style.display = 'flex';
 
         // Run download engine
         runLocalBackendDownload(videoId, song);
@@ -2391,40 +2430,50 @@
         const s3 = document.getElementById('step3Item');
         const s4 = document.getElementById('step4Item');
 
-        [s1, s2, s3, s4].forEach(s => { s.classList.remove('active', 'done'); });
+        [s1, s2, s3, s4].forEach(s => {
+            if (s) s.classList.remove('active', 'done');
+        });
+
+        const icon1 = document.getElementById('step1Icon');
+        const sub1 = document.getElementById('step1Sub');
+        const icon2 = document.getElementById('step2Icon');
+        const sub2 = document.getElementById('step2Sub');
+        const icon3 = document.getElementById('step3Icon');
+        const sub3 = document.getElementById('step3Sub');
+        const icon4 = document.getElementById('step4Icon');
+        const sub4 = document.getElementById('step4Sub');
 
         if (step === 1) {
-            s1.classList.add('active');
-            document.getElementById('step1Icon').innerHTML = '🔍';
-            document.getElementById('step1Sub').textContent = 'Checking audio availability...';
+            if (s1) s1.classList.add('active');
+            if (icon1) icon1.innerHTML = '🔍';
+            if (sub1) sub1.textContent = 'Checking audio availability...';
         } else if (step === 2) {
-            s1.classList.add('done');
-            document.getElementById('step1Icon').innerHTML = '✓';
-            document.getElementById('step1Sub').textContent = 'Status: Valid / Allowed';
-            s2.classList.add('active');
-            document.getElementById('step2Icon').innerHTML = '☁';
-            document.getElementById('step2Sub').textContent = 'Extracting and buffering 192kbps MP3 audio stream...';
+            if (s1) s1.classList.add('done');
+            if (icon1) icon1.innerHTML = '✓';
+            if (sub1) sub1.textContent = 'Status: Valid / Allowed';
+            if (s2) s2.classList.add('active');
+            if (icon2) icon2.innerHTML = '☁';
+            if (sub2) sub2.textContent = 'Extracting and buffering 192kbps MP3 audio stream...';
         } else if (step === 3) {
-            s1.classList.add('done');
-            document.getElementById('step1Icon').innerHTML = '✓';
-            s2.classList.add('done');
-            document.getElementById('step2Icon').innerHTML = '✓';
-            document.getElementById('step2Sub').textContent = 'Audio stream buffered (100%)';
-            s3.classList.add('active');
-            document.getElementById('step3Icon').innerHTML = '⚡';
-            document.getElementById('step3Sub').textContent = 'Converting to pristine 192kbps MP3 format...';
+            if (s1) s1.classList.add('done');
+            if (s2) s2.classList.add('done');
+            if (icon1) icon1.innerHTML = '✓';
+            if (icon2) icon2.innerHTML = '✓';
+            if (sub2) sub2.textContent = 'Audio stream buffered (100%)';
+            if (s3) s3.classList.add('active');
+            if (icon3) icon3.innerHTML = '⚡';
+            if (sub3) sub3.textContent = 'Converting to pristine 192kbps MP3 format...';
         } else if (step === 4) {
-            s1.classList.add('done');
-            document.getElementById('step1Icon').innerHTML = '✓';
-            s2.classList.add('done');
-            document.getElementById('step2Icon').innerHTML = '✓';
-            document.getElementById('step2Sub').textContent = 'Audio stream buffered (100%)';
-            s3.classList.add('done');
-            document.getElementById('step3Icon').innerHTML = '✓';
-            document.getElementById('step3Sub').textContent = 'MP3 audio format conversion complete';
-            s4.classList.add('done');
-            document.getElementById('step4Icon').innerHTML = '✓';
-            document.getElementById('step4Sub').textContent = '✅ Saved! File ready in device storage (Downloads).';
+            if (s1) s1.classList.add('done');
+            if (s2) s2.classList.add('done');
+            if (s3) s3.classList.add('done');
+            if (s4) s4.classList.add('done');
+            if (icon1) icon1.innerHTML = '✓';
+            if (icon2) icon2.innerHTML = '✓';
+            if (icon3) icon3.innerHTML = '✓';
+            if (icon4) icon4.innerHTML = '✓';
+            if (sub3) sub3.textContent = 'MP3 audio format conversion complete';
+            if (sub4) sub4.textContent = '✅ Saved! File ready in device storage (Downloads).';
 
             const saveBtn = document.getElementById('saveFileBtn');
             if (saveBtn) {
@@ -2446,6 +2495,9 @@
             }).then(r => r.json());
 
             if (!res.task_id) {
+                if (res && res.error) {
+                    showToast(`⚠️ ${res.error}`);
+                }
                 runClientBackgroundDownload(videoId, song);
                 return;
             }

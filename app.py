@@ -1,5 +1,12 @@
 import os
 import sys
+
+# Force UTF-8 encoding on standard I/O to avoid Windows CP1252 UnicodeEncodeError
+if sys.stdout and hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+if sys.stderr and hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+
 import glob
 import uuid
 import shutil
@@ -95,7 +102,7 @@ def cleanup_old_downloads(max_age_hours=2, max_total_mb=400):
                 except Exception:
                     pass
     except Exception as e:
-        print(f"Cleanup error: {e}")
+        print(f"[CLEANUP ERROR] {e}", flush=True)
 
 
 def validate_youtube_target(target):
@@ -110,8 +117,8 @@ def validate_youtube_target(target):
     if len(target) > 300:
         return None
 
-    # 1. Direct 11-character Video ID
-    if re.match(r'^[a-zA-Z0-9_-]{11}$', target):
+    # 1. Direct 10 to 20-character Video ID
+    if re.match(r'^[a-zA-Z0-9_-]{10,20}$', target):
         return f"https://www.youtube.com/watch?v={target}"
 
     # 2. Direct Playlist ID
@@ -220,7 +227,7 @@ def download_song(url, task_id):
                 with open(meta_path, "w", encoding="utf-8") as mf:
                     json.dump(meta_data, mf, ensure_ascii=False)
             except Exception as me:
-                print(f"Meta write error: {me}")
+                print(f"[META WRITE ERROR] {me}", flush=True)
 
             progress_store[task_id] = {
                 "status": "done",
@@ -238,7 +245,7 @@ def download_song(url, task_id):
     except Exception as e:
         import traceback
         tb_str = traceback.format_exc()
-        print(f"DOWNLOAD ERROR:\n{tb_str}", flush=True)
+        print(f"[DOWNLOAD ERROR]\n{tb_str}", flush=True)
         progress_store[task_id] = {
             "status": "error",
             "message": str(e),
@@ -302,7 +309,7 @@ def extract_playlist_songs(query, limit=75):
             extracted_title = res.get("title") or pl_title
             return extracted_title, songs
     except Exception as e:
-        print(f"Error extracting playlist: {e}")
+        print(f"[PLAYLIST ERROR] {e}", flush=True)
         return None, []
 
 
@@ -394,7 +401,7 @@ def search_songs():
     if not query:
         return jsonify({"error": "Invalid search query"}), 400
 
-    print(f"🔍 SEARCH: '{query}'", flush=True)
+    print(f"[SEARCH] '{query}'", flush=True)
 
     try:
         # Check if user is searching for a playlist, album, or direct playlist link
@@ -463,7 +470,7 @@ def stream_song():
     if not safe_url:
         return jsonify({"error": "Invalid audio URL. Only legitimate YouTube links are permitted."}), 400
 
-    print(f"▶ STREAM: '{raw_url}' -> '{safe_url}'", flush=True)
+    print(f"[STREAM] '{raw_url}' -> '{safe_url}'", flush=True)
 
     try:
         ydl_opts = {
@@ -511,7 +518,7 @@ def start_download():
         return jsonify({"error": "Invalid URL. Only legitimate YouTube audio links are permitted."}), 400
 
     task_id = str(uuid.uuid4())[:8]
-    print(f"📥 DOWNLOAD REQUEST: '{raw_url}' -> '{safe_url}' (task_id: {task_id})", flush=True)
+    print(f"[DOWNLOAD REQUEST] '{raw_url}' -> '{safe_url}' (task_id: {task_id})", flush=True)
     progress_store[task_id] = {"status": "starting", "percent": 0}
 
     thread = threading.Thread(target=download_song, args=(safe_url, task_id))
@@ -537,13 +544,13 @@ def serve_file(filename):
     Serve a downloaded MP3 file safely.
     Blocks directory traversal and path manipulation attacks.
     """
-    print(f"📦 SERVE FILE REQUEST: '{filename}'", flush=True)
+    print(f"[SERVE FILE REQUEST] '{filename}'", flush=True)
     # 1. Path Traversal Guard: reject null bytes, directory slashes, or non-matching names
     if ".." in filename or "/" in filename or "\\" in filename or "\x00" in filename:
         return jsonify({"error": "Invalid file request"}), 400
 
     clean_filename = secure_filename(filename)
-    if not re.match(r'^[a-zA-Z0-9_\-\.]+\.mp3$', clean_filename):
+    if not re.match(r'^[a-zA-Z0-9_\-\.]+\.(mp3|m4a|webm|ogg|wav|opus)$', clean_filename, re.IGNORECASE):
         return jsonify({"error": "Invalid file format requested"}), 400
 
     filepath = os.path.join(DOWNLOAD_DIR, clean_filename)
