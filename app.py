@@ -331,6 +331,15 @@ def list_downloads():
     return jsonify({"files": files})
 
 
+@app.route("/<path:filename>")
+def serve_root_file(filename):
+    """Serve root files like images and static assets."""
+    filepath = os.path.join(BASE_DIR, filename)
+    if os.path.exists(filepath) and os.path.isfile(filepath):
+        return send_file(filepath)
+    return jsonify({"error": "File not found"}), 404
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     print(f"\n==============================================")

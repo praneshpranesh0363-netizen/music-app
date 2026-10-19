@@ -411,45 +411,222 @@
             flex-shrink: 0;
         }
         .btn-row-play {
-            background: linear-gradient(135deg, rgba(17, 153, 142, 0.25), rgba(56, 239, 125, 0.25));
-            border: 1px solid rgba(56, 239, 125, 0.6);
-            color: #38ef7d;
-            padding: 6px 12px;
-            border-radius: 16px;
-            font-size: 0.78em;
+            background: #1a73e8;
+            border: 1px solid #1a73e8;
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.82em;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 5px;
             white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(26, 115, 232, 0.35);
         }
         .btn-row-play:hover {
-            background: linear-gradient(135deg, #11998e, #38ef7d);
-            color: #fff;
-            transform: scale(1.05);
+            background: #1557b0;
+            border-color: #1557b0;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(26, 115, 232, 0.5);
         }
 
         .btn-row-download {
-            background: linear-gradient(135deg, rgba(142, 45, 226, 0.25), rgba(160, 68, 255, 0.25));
-            border: 1px solid rgba(160, 68, 255, 0.6);
-            color: #d1b5ff;
-            padding: 6px 12px;
-            border-radius: 16px;
-            font-size: 0.78em;
+            background: #8b5cf6;
+            border: 1px solid #8b5cf6;
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.82em;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 5px;
             white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.35);
         }
         .btn-row-download:hover {
-            background: linear-gradient(135deg, #8e2de2, #4a00e0);
+            background: #7c3aed;
+            border-color: #7c3aed;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.5);
+        }
+
+        /* ======================================================== */
+        /* PANEL 1: PLAYLIST SELECTION PAGE STYLING                 */
+        /* ======================================================== */
+        .playlist-selection-panel {
+            background: rgba(20, 16, 43, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.45);
+        }
+        .playlists-section-title {
+            font-size: 1.25em;
+            font-weight: 800;
             color: #fff;
-            transform: scale(1.05);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .playlist-select-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .playlist-select-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 12px 18px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .playlist-select-card:hover {
+            background: rgba(255, 255, 255, 0.09);
+            border-color: rgba(26, 115, 232, 0.5);
+            transform: translateX(4px);
+        }
+        .playlist-select-img {
+            width: 52px;
+            height: 52px;
+            border-radius: 10px;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: #252048;
+        }
+        .playlist-select-details {
+            flex: 1;
+            min-width: 0;
+        }
+        .playlist-select-name {
+            font-size: 1.05em;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 3px;
+        }
+        .playlist-select-count {
+            font-size: 0.84em;
+            color: #9ba1b5;
+        }
+        .playlist-select-arrow {
+            font-size: 1.5em;
+            color: #727891;
+            font-weight: 300;
+            transition: transform 0.2s;
+        }
+        .playlist-select-card:hover .playlist-select-arrow {
+            color: #fff;
+            transform: translateX(4px);
+        }
+
+        /* ======================================================== */
+        /* PANEL 2: PLAYLIST HEADER, BACK BTN & WITHIN-SEARCH       */
+        /* ======================================================== */
+        .btn-back-playlists {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            color: #fff;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .btn-back-playlists:hover {
+            background: #1a73e8;
+            border-color: #1a73e8;
+            transform: scale(1.08);
+        }
+        .within-playlist-container {
+            padding: 10px 20px 14px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .within-playlist-input {
+            width: 100%;
+            padding: 11px 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            color: #fff;
+            font-size: 0.92em;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .within-playlist-input:focus {
+            border-color: #1a73e8;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 15px rgba(26, 115, 232, 0.25);
+        }
+
+        /* ======================================================== */
+        /* PANEL 3: PLAY NOTICE BANNER                              */
+        /* ======================================================== */
+        .play-notice-banner {
+            background: rgba(56, 239, 125, 0.12);
+            border: 1px solid rgba(56, 239, 125, 0.35);
+            color: #38ef7d;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 0.82em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 10px 20px 4px 20px;
+        }
+
+        /* ======================================================== */
+        /* PANEL 4: DOWNLOAD MODAL ELEMENTS                         */
+        /* ======================================================== */
+        .dl-saved-destination-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 8px 14px;
+            font-size: 0.86em;
+            color: #e0e4f2;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 12px 0 8px 0;
+        }
+        .dl-complete-card {
+            display: none;
+            background: rgba(56, 239, 125, 0.12);
+            border: 1px solid rgba(56, 239, 125, 0.4);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-top: 12px;
+        }
+        .dl-purple-footer-badge {
+            background: rgba(142, 45, 226, 0.15);
+            border: 1px solid rgba(142, 45, 226, 0.35);
+            color: #d1b5ff;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 0.82em;
+            line-height: 1.45;
+            margin-top: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .btn-row-add {
@@ -984,8 +1161,8 @@
 
 <div class="container">
     <div class="header" style="text-align:center; padding: 10px 0 14px 0;">
-        <h1 style="font-size:2em; font-weight:800; margin-bottom:4px; background:linear-gradient(90deg, #ff719a, #ff9068, #fcd000); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">🎵 MusicFlow</h1>
-        <p style="font-size:0.84em; color:var(--text-muted); margin:0;">100% Ad-Free Music &bull; Direct MP3 Downloads</p>
+        <h1 style="font-size:2.1em; font-weight:800; margin-bottom:4px; background:linear-gradient(90deg, #ff719a, #ff9068, #fcd000); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">🎵 Music Zone</h1>
+        <p style="font-size:0.86em; color:var(--text-muted); margin:0;">100% Ad-Free Music &bull; Direct MP3 Downloads &bull; All in One Page</p>
     </div>
 
     <!-- SEARCH VIEW: JUST SEARCH BAR AT TOP -->
@@ -999,26 +1176,58 @@
             <button class="search-submit" id="searchBtn" onclick="performSearch()">🔍 Search</button>
         </div>
 
-        <!-- LINE-BY-LINE NUMBERED PLAYLIST VIEW (WITH DUAL PLAY & DOWNLOAD ACTIONS) -->
-        <div id="playlistQueueBox" class="playlist-queue-box">
-            <div class="queue-header">
-                <div class="queue-top-row">
-                    <div class="queue-title" id="queueTitle">Music Search Results</div>
+        <!-- ======================================================== -->
+        <!-- PANEL 1: PLAYLIST SELECTION PAGE                         -->
+        <!-- ======================================================== -->
+        <div id="playlistSelectionPanel" class="playlist-selection-panel">
+            <div class="playlists-section-title">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span>📁</span>
+                    <span>Playlists</span>
                 </div>
-                <div class="queue-meta" id="queueMeta">Type any song or playlist above to start</div>
-                <div class="queue-actions-row">
+                <button class="queue-icon-btn" onclick="openFlowDiagramModal()" title="View Architecture Flowchart" style="font-size:0.85em; padding:4px 10px;">📊 Flow Diagram</button>
+            </div>
+            <div class="playlist-select-list" id="playlistSelectList">
+                <!-- Populated dynamically via JS -->
+            </div>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- PANEL 2: PLAYLIST SONGS (EACH SONG SEPARATE)             -->
+        <!-- ======================================================== -->
+        <div id="playlistQueueBox" class="playlist-queue-box" style="display:none;">
+            <div class="queue-header">
+                <div class="queue-top-row" style="align-items:center;">
+                    <button class="btn-back-playlists" onclick="backToPlaylistSelection()" title="Back to Playlists">←</button>
+                    <div style="flex:1; min-width:0; padding:0 12px;">
+                        <div class="queue-title" id="queueTitle">Playlist Songs</div>
+                        <div class="queue-meta" id="queueMeta" style="margin:2px 0 0 0;">Select to play or download</div>
+                    </div>
+                </div>
+                <div class="queue-actions-row" style="margin-top:10px;">
                     <button class="btn-play-all" onclick="playAllQueue()">▶ Play All</button>
                     <button class="queue-icon-btn" id="repeatBtn" onclick="toggleRepeat()" title="Repeat">🔁 Repeat</button>
                     <button class="queue-icon-btn" id="shuffleBtn" onclick="toggleShuffle()" title="Shuffle">🔀 Shuffle</button>
                     <button class="queue-icon-btn" onclick="openFlowDiagramModal()" title="View Architecture Flowchart">📊 Flow</button>
                 </div>
             </div>
+
+            <!-- In-Playlist Search (Panel 2 from Diagram) -->
+            <div class="within-playlist-container">
+                <input type="text" id="withinPlaylistInput" class="within-playlist-input"
+                       placeholder="🔍 Search within playlist..."
+                       oninput="filterCurrentPlaylistSongs(this.value)">
+            </div>
+
+            <!-- Notice Banner for In-Page Play (Panel 3 from Diagram) -->
+            <div class="play-notice-banner">
+                <span>✓</span>
+                <span>The song plays in the same page using an audio player. No redirect to another website.</span>
+            </div>
+
             <!-- Numbered Line-by-Line Songs List -->
             <div class="queue-list" id="queueList">
-                <div class="empty-state">
-                    <p style="font-size:1.05em; color:#9ba1b5; margin-bottom:6px;">🔍 Enter any song, singer, or playlist in the search bar above.</p>
-                    <p style="font-size:0.85em; color:#6f758d;">Results will appear line-by-line with 1-click Play and MP3 Download.</p>
-                </div>
+                <div class="empty-state"><span class="spinner"></span><p style="margin-top:10px">Loading songs...</p></div>
             </div>
         </div>
     </div>
@@ -1049,7 +1258,7 @@
         </div>
 
         <div style="font-size:0.86em; color:#d1b5ff; margin-bottom:12px; font-weight:700; display:flex; align-items:center; gap:6px;">
-            <span>⬇ Background MP3 Download Handler (100% Free & In-Page):</span>
+            <span>⬇ Download in Background (100% Free & In-Page):</span>
         </div>
 
         <!-- 4-Phase Stepper from the Diagram -->
@@ -1057,7 +1266,7 @@
             <div class="dl-step-icon" id="step1Icon">✓</div>
             <div style="flex:1;">
                 <div class="dl-step-text-title">1. Check Download Availability</div>
-                <div class="dl-step-text-sub" id="step1Sub">Status: Valid / Allowed audio stream</div>
+                <div class="dl-step-text-sub" id="step1Sub">Status: Valid audio stream detected</div>
             </div>
         </div>
 
@@ -1066,12 +1275,12 @@
             <div style="flex:1;">
                 <div class="dl-step-text-title" style="display:flex; justify-content:space-between;">
                     <span>2. Download in Background</span>
-                    <span id="dlPercentLabel" style="color:#38ef7d;">0%</span>
+                    <span id="dlPercentLabel" style="color:#38ef7d; font-weight:800;">0%</span>
                 </div>
                 <div class="dl-progress-bar-wrap">
                     <div class="dl-progress-bar-fill" id="dlProgressFill"></div>
                 </div>
-                <div class="dl-step-text-sub" id="step2Sub">Extracting and buffering 192kbps MP3 audio stream...</div>
+                <div class="dl-step-text-sub" id="step2Sub">Buffering high-fidelity audio stream...</div>
             </div>
         </div>
 
@@ -1083,27 +1292,36 @@
             </div>
         </div>
 
-        <div class="dl-step-item" id="step4Item">
-            <div class="dl-step-icon" id="step4Icon">🎵</div>
-            <div style="flex:1;">
-                <div class="dl-step-text-title">4. Access File</div>
-                <div class="dl-step-text-sub" id="step4Sub">Directly available in mobile Files or desktop Downloads</div>
+        <!-- Save Destination Box (from Panel 4) -->
+        <div style="font-size:0.8em; color:#9ba1b5; margin-top:10px;">Download will be saved to:</div>
+        <div class="dl-saved-destination-box">
+            <span>📁</span>
+            <span style="font-weight:700; color:#fff;">Downloads</span>
+            <span style="font-size:0.8em; color:#9ba1b5; margin-left:auto;">(Device Storage)</span>
+        </div>
+
+        <!-- Download Complete Box (from Panel 4) -->
+        <div class="dl-complete-card" id="dlCompleteBox">
+            <div style="display:flex; align-items:center; gap:8px; font-weight:800; color:#38ef7d; font-size:0.95em;">
+                <span>✓</span>
+                <span>Download Complete!</span>
             </div>
+            <div id="dlCompleteFilename" style="font-size:0.84em; color:#e0e4f2; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Song.mp3</div>
         </div>
 
         <!-- Direct In-Page MP3 Save Button -->
-        <a id="directMp3LinkBtn" href="#" download="" style="display:none; text-decoration:none; text-align:center; background:linear-gradient(135deg, #11998e, #38ef7d); color:#fff; padding:12px 18px; border-radius:12px; font-weight:800; font-size:0.95em; box-shadow:0 6px 20px rgba(56,239,125,0.4); margin-top:14px; width:100%; cursor:pointer; transition:transform 0.2s;">⬇ Tap Here to Download MP3 to Phone</a>
-
-        <!-- In-Page Download status info -->
-        <div id="ghPagesNotice" style="display:none; background:rgba(102,126,234,0.15); border:1px solid rgba(102,126,234,0.4); border-radius:12px; padding:10px 14px; margin-top:12px; font-size:0.82em; color:#d1d5e4; line-height:1.45;">
-            ⚡ <strong>100% In-Page Downloader:</strong> Converting & saving directly to your device storage right on this page.
-        </div>
+        <a id="directMp3LinkBtn" href="#" download="" style="display:none; text-decoration:none; text-align:center; background:linear-gradient(135deg, #11998e, #38ef7d); color:#fff; padding:12px 18px; border-radius:12px; font-weight:800; font-size:0.95em; box-shadow:0 6px 20px rgba(56,239,125,0.4); margin-top:14px; width:100%; cursor:pointer; transition:transform 0.2s;">⬇ Tap Here to Save MP3 to Phone</a>
 
         <div style="display:flex; align-items:center; justify-content:space-between; margin-top:14px;">
             <button onclick="saveCurrentDownloadDirect()" id="saveFileBtn" style="background:linear-gradient(135deg, #11998e, #38ef7d); border:none; color:#fff; padding:8px 16px; border-radius:10px; font-size:0.84em; font-weight:700; cursor:pointer;">💾 Save MP3 Now</button>
             <button onclick="closeDownloadModal()" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:#ccc; padding:8px 16px; border-radius:10px; font-size:0.84em; cursor:pointer;">Stay on Page</button>
         </div>
-        <p style="font-size:0.75em; color:#7e8499; margin-top:12px; text-align:center;">🎧 You can continue listening to music while this downloads in the background.</p>
+
+        <!-- Purple footer badge from Panel 4 -->
+        <div class="dl-purple-footer-badge">
+            <span style="font-size:1.15em;">ℹ</span>
+            <span>The download happens in the background and you stay on the same page.</span>
+        </div>
     </div>
 </div>
 <iframe id="hiddenDownloadIframe" style="display:none;" title="Silent In-Page Download"></iframe>
@@ -1117,8 +1335,14 @@
 
         <div style="text-align:center; margin-bottom:14px; padding-right:24px;">
             <div style="display:inline-block; background:rgba(142,45,226,0.18); border:1px solid rgba(142,45,226,0.5); color:#d1b5ff; padding:4px 14px; border-radius:20px; font-size:0.8em; font-weight:700; margin-bottom:6px;">ARCHITECTURE SPECIFICATION</div>
-            <h2 style="font-size:1.6em; color:#fff;">Music Download App &ndash; Flow Diagram</h2>
-            <p style="color:#9ba1b5; font-size:0.9em;">Search &bull; Play &bull; Download &bull; All in One Page</p>
+            <h2 style="font-size:1.6em; color:#fff;">Music Download Website &ndash; Playlist Flow Diagram</h2>
+            <p style="color:#d1b5ff; font-size:0.92em; font-weight:600; margin-top:4px;">Playlist தேர்வு செய்தால், அதன் உள்ள ஒவ்வொரு பாடலும் தனித்தனியாக காட்டப்படும். ஒவ்வொரு பாடலுக்கும் Play மற்றும் Download பட்டன் இருக்கும்.</p>
+            <p style="color:#9ba1b5; font-size:0.82em; margin-top:2px;">(When a playlist is selected, every song inside it is displayed separately with Play &amp; Download buttons on the same page)</p>
+        </div>
+
+        <!-- Embedded Diagram Image matching user specification -->
+        <div style="text-align:center; margin-bottom:18px;">
+            <img src="playlist_flow_diagram.jpg" alt="Playlist Flow Diagram" style="width:100%; max-height:480px; object-fit:contain; border-radius:14px; border:1px solid rgba(255,255,255,0.15); background:#0c0a1a;">
         </div>
 
         <div class="flow-grid-container">
@@ -1519,10 +1743,109 @@
         performSearch();
     }
 
+    // ==================== PANEL 1: FEATURED PLAYLISTS ====================
+    const FEATURED_PLAYLISTS = [
+        {
+            title: "Tamil Hits",
+            count: "50 songs",
+            query: "Tamil Hits playlist",
+            cover: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=160&h=160&fit=crop"
+        },
+        {
+            title: "Love Songs",
+            count: "45 songs",
+            query: "Love Songs romantic playlist",
+            cover: "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=160&h=160&fit=crop"
+        },
+        {
+            title: "Top 50",
+            count: "50 songs",
+            query: "Top 50 songs playlist",
+            cover: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=160&h=160&fit=crop"
+        },
+        {
+            title: "Arijit Singh",
+            count: "35 songs",
+            query: "Arijit Singh playlist",
+            cover: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=160&h=160&fit=crop"
+        },
+        {
+            title: "Kannada Best Melody Songs",
+            count: "50 songs",
+            query: "Kannada Best Melody Songs playlist",
+            cover: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=160&h=160&fit=crop"
+        },
+        {
+            title: "Anirudh Ravichander Hits",
+            count: "40 songs",
+            query: "Anirudh Ravichander playlist",
+            cover: "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=160&h=160&fit=crop"
+        }
+    ];
+
+    function renderFeaturedPlaylists() {
+        const container = document.getElementById('playlistSelectList');
+        if (!container) return;
+        container.innerHTML = FEATURED_PLAYLISTS.map((pl, idx) => `
+            <div class="playlist-select-card" onclick="selectFeaturedPlaylist(${idx})">
+                <img class="playlist-select-img" src="${pl.cover}" alt="${escapeHtml(pl.title)}" onerror="this.src='https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=120&h=120&fit=crop'">
+                <div class="playlist-select-details">
+                    <div class="playlist-select-name">${escapeHtml(pl.title)}</div>
+                    <div class="playlist-select-count">${escapeHtml(pl.count)}</div>
+                </div>
+                <div class="playlist-select-arrow">&rsaquo;</div>
+            </div>
+        `).join('');
+    }
+
+    function selectFeaturedPlaylist(idx) {
+        const pl = FEATURED_PLAYLISTS[idx];
+        if (!pl) return;
+        document.getElementById('searchInput').value = pl.query;
+        switchToPlaylistView(pl.title, pl.count);
+        performSearch(pl.query, pl.title);
+    }
+
+    function switchToPlaylistView(title, count) {
+        const selPanel = document.getElementById('playlistSelectionPanel');
+        const queueBox = document.getElementById('playlistQueueBox');
+        if (selPanel) selPanel.style.display = 'none';
+        if (queueBox) queueBox.style.display = 'block';
+
+        const withinInput = document.getElementById('withinPlaylistInput');
+        if (withinInput) withinInput.value = '';
+
+        if (title) document.getElementById('queueTitle').textContent = title;
+        if (count) document.getElementById('queueMeta').textContent = `${count} • 100% Ad-Free • In-Page Downloads`;
+    }
+
+    function backToPlaylistSelection() {
+        const selPanel = document.getElementById('playlistSelectionPanel');
+        const queueBox = document.getElementById('playlistQueueBox');
+        if (selPanel) selPanel.style.display = 'block';
+        if (queueBox) queueBox.style.display = 'none';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function filterCurrentPlaylistSongs(filterText) {
+        const term = (filterText || '').trim().toLowerCase();
+        if (!term) {
+            renderQueueItems(currentQueue);
+            return;
+        }
+        const filtered = currentQueue.filter(s =>
+            (s.title || '').toLowerCase().includes(term) ||
+            (s.artist || '').toLowerCase().includes(term)
+        );
+        renderQueueItems(filtered);
+    }
+
     // ==================== SEARCH & DISPLAY ====================
-    async function performSearch() {
-        const query = document.getElementById('searchInput').value.trim();
+    async function performSearch(customQuery, overrideTitle) {
+        const query = (customQuery || document.getElementById('searchInput').value).trim();
         if (!query) return;
+
+        switchToPlaylistView(overrideTitle || query, 'Loading songs...');
 
         const btn = document.getElementById('searchBtn');
         const queueList = document.getElementById('queueList');
@@ -1531,7 +1854,7 @@
 
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner"></span>';
-        queueTitle.textContent = `${query}`;
+        if (!overrideTitle) queueTitle.textContent = `${query}`;
         queueMeta.textContent = `Searching line-by-line playlist songs...`;
         queueList.innerHTML = '<div class="empty-state"><span class="spinner"></span><p style="margin-top:10px">Extracting line-by-line songs...</p></div>';
 
@@ -1621,12 +1944,12 @@
             return;
         }
 
-        const displayTitle = extractedPlaylistTitle || query;
+        const displayTitle = overrideTitle || extractedPlaylistTitle || query;
         queueTitle.textContent = displayTitle;
         activePlaylistInfo = { title: displayTitle, author: 'Playlist Songs', total: songs.length };
         currentQueue = songs;
-        queueMeta.textContent = `${currentQueue.length} Songs in Playlist • 100% Ad-Free • In-Page MP3 Downloads`;
-        renderQueueItems();
+        queueMeta.textContent = `${currentQueue.length} songs in playlist • 100% Ad-Free • In-Page Downloads`;
+        renderQueueItems(currentQueue);
 
         btn.disabled = false;
         btn.textContent = '🔍 Search';
@@ -1640,6 +1963,7 @@
         const queueMeta = document.getElementById('queueMeta');
         const queueList = document.getElementById('queueList');
 
+        switchToPlaylistView(title, `${author} - Loading full playlist...`);
         queueTitle.textContent = title;
         queueMeta.textContent = `${author} - Loading full playlist...`;
         queueList.innerHTML = '<div class="empty-state"><span class="spinner"></span><p style="margin-top:10px">Loading line-by-line playlist...</p></div>';
@@ -1669,7 +1993,7 @@
             });
 
             queueMeta.textContent = `${author} - 1 / ${currentQueue.length}`;
-            renderQueueItems();
+            renderQueueItems(currentQueue);
             playSong(0);
 
         } catch (e) {
@@ -1678,11 +2002,20 @@
     }
 
     // ==================== RENDER NUMBERED ROWS (PLAY & DOWNLOAD BUTTONS) ====================
-    function renderQueueItems() {
+    function renderQueueItems(itemsToRender) {
         const queueList = document.getElementById('queueList');
-        queueList.innerHTML = currentQueue.map((song, i) => `
-            <div class="queue-row ${i === currentIndex ? 'active' : ''}" id="qrow-${i}" onclick="playSong(${i})">
-                <div class="queue-num" id="qnum-${i}">${i === currentIndex ? '&#9654;' : (i + 1)}</div>
+        const list = itemsToRender || currentQueue;
+        if (!list || list.length === 0) {
+            queueList.innerHTML = '<div class="empty-state"><p>No songs match your search in this playlist.</p></div>';
+            return;
+        }
+        queueList.innerHTML = list.map((song, i) => {
+            const originalIndex = currentQueue.findIndex(s => s.videoId === song.videoId);
+            const playIdx = (originalIndex !== -1) ? originalIndex : i;
+            const isActive = (playIdx === currentIndex);
+            return `
+            <div class="queue-row ${isActive ? 'active' : ''}" id="qrow-${playIdx}" onclick="playSong(${playIdx})">
+                <div class="queue-num" id="qnum-${playIdx}">${isActive ? '&#9654;' : (i + 1)}</div>
                 <div class="queue-thumb-box">
                     <img class="queue-thumb-img" src="${song.artwork}" alt="${escapeHtml(song.title)}" onerror="this.src='https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&h=60&fit=crop'">
                     <span class="queue-dur-badge">${formatDuration(song.duration)}</span>
@@ -1692,12 +2025,13 @@
                     <div class="queue-track-author">${escapeHtml(song.artist)}</div>
                 </div>
                 <div class="queue-row-actions" onclick="event.stopPropagation()">
-                    <button class="btn-row-play" onclick="playSong(${i})" title="Play on same page">&#9654; Play</button>
+                    <button class="btn-row-play" onclick="playSong(${playIdx})" title="Play on same page">&gt; Play</button>
                     <button class="btn-row-download" onclick="startDownloadFlow('${song.videoId}', '${escapeHtml(song.title).replace(/'/g, "\\'")}', '${escapeHtml(song.artist).replace(/'/g, "\\'")}', '${song.artwork}')" title="Background MP3 Download">&#11015; Download</button>
                     <button class="btn-row-add" onclick="promptAddToPlaylistByVideoId('${song.videoId}')" title="Add to Playlist">+</button>
                 </div>
             </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     function updateQueueHighlight() {
@@ -2346,6 +2680,7 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
+        renderFeaturedPlaylists();
         const input = document.getElementById('searchInput');
         if (input) {
             input.value = '';
