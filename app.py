@@ -5,6 +5,8 @@ import uuid
 import shutil
 import threading
 import urllib.parse
+import json
+import re
 from flask import Flask, render_template, request, jsonify, send_file
 import yt_dlp
 
@@ -22,6 +24,17 @@ os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
 # In-memory progress tracking
 progress_store = {}
+
+
+def get_safe_ascii_name(name):
+    """Generate safe ASCII-only filename with .mp3 extension to prevent header encoding issues."""
+    clean = re.sub(r'[^a-zA-Z0-9\s\-_.()]', '', name or '').strip()
+    clean = re.sub(r'\s+', ' ', clean)
+    if not clean or clean == ".mp3":
+        clean = "Song"
+    if not clean.lower().endswith(".mp3"):
+        clean += ".mp3"
+    return clean
 
 
 def progress_hook(d, task_id):
@@ -71,18 +84,32 @@ def download_song(url, task_id):
             title = info.get("title", "Unknown Title")
 
         pattern = os.path.join(DOWNLOAD_DIR, f"{task_id}.*")
-        matches = glob.glob(pattern)
+        matches = [m for m in glob.glob(pattern) if not m.endswith(".json") and not m.endswith(".part")]
         if matches:
-            filepath = matches[0]
-            safe_title = "".join(c for c in title if c.isalnum() or c in (" ", "-", "_", "(", ")", ".")).strip()
-            if not safe_title:
-                safe_title = "song"
+            mp3_matches = [m for m in matches if m.lower().endswith(".mp3")]
+            filepath = mp3_matches[0] if mp3_matches else matches[0]
+            clean_name = get_safe_ascii_name(title)
+
+            # Persist metadata to disk across server reloads
+            meta_data = {
+                "task_id": task_id,
+                "title": title,
+                "download_name": clean_name,
+                "filename": os.path.basename(filepath)
+            }
+            try:
+                meta_path = os.path.join(DOWNLOAD_DIR, f"{task_id}.meta.json")
+                with open(meta_path, "w", encoding="utf-8") as mf:
+                    json.dump(meta_data, mf, ensure_ascii=False)
+            except Exception as me:
+                print(f"Meta write error: {me}")
+
             progress_store[task_id] = {
                 "status": "done",
                 "percent": 100,
                 "title": title,
                 "filename": os.path.basename(filepath),
-                "download_name": f"{safe_title}.mp3"
+                "download_name": clean_name
             }
         else:
             progress_store[task_id] = {
@@ -277,6 +304,7 @@ def add_cors_headers(response):
     response.headers["Access-Control-Allow-Origin"] = "*"
     response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    response.headers["Access-Control-Expose-Headers"] = "Content-Disposition, Content-Length"
     return response
 
 
@@ -289,31 +317,50 @@ def get_progress(task_id):
 
 @app.route("/api/file/<filename>")
 def serve_file(filename):
-    """Serve a downloaded MP3 file."""
+    """Serve a downloaded MP3 file with rock-solid mobile download headers."""
     filepath = os.path.join(DOWNLOAD_DIR, filename)
-    if os.path.exists(filepath):
+    if not os.path.exists(filepath):
         task_id = filename.split(".")[0]
-        info = progress_store.get(task_id, {})
-        clean_name = info.get("download_name")
-        if not clean_name:
-            clean_name = filename.split("_", 1)[-1] if "_" in filename else filename
-        if not clean_name.lower().endswith(".mp3"):
-            clean_name += ".mp3"
-        try:
-            return send_file(
-                filepath,
-                as_attachment=True,
-                download_name=clean_name,
-                mimetype="audio/mpeg"
-            )
-        except TypeError:
-            return send_file(
-                filepath,
-                as_attachment=True,
-                attachment_filename=clean_name,
-                mimetype="audio/mpeg"
-            )
-    return jsonify({"error": "File not found"}), 404
+        pattern = os.path.join(DOWNLOAD_DIR, f"{task_id}.*")
+        matches = [m for m in glob.glob(pattern) if not m.endswith(".json") and not m.endswith(".part")]
+        if matches:
+            filepath = matches[0]
+        else:
+            return jsonify({"error": "File not found"}), 404
+
+    task_id = os.path.basename(filepath).split(".")[0]
+    info = progress_store.get(task_id, {})
+    title = info.get("title")
+    clean_name = info.get("download_name")
+
+    if not title or not clean_name:
+        meta_path = os.path.join(DOWNLOAD_DIR, f"{task_id}.meta.json")
+        if os.path.exists(meta_path):
+            try:
+                with open(meta_path, "r", encoding="utf-8") as mf:
+                    meta = json.load(mf)
+                    title = title or meta.get("title")
+                    clean_name = clean_name or meta.get("download_name")
+            except Exception:
+                pass
+
+    if not title:
+        title = filename.rsplit(".", 1)[0]
+    if not clean_name:
+        clean_name = get_safe_ascii_name(title)
+
+    encoded_title = urllib.parse.quote(f"{title}.mp3" if not title.lower().endswith(".mp3") else title)
+
+    response = send_file(
+        filepath,
+        as_attachment=True,
+        download_name=clean_name,
+        mimetype="audio/mpeg"
+    )
+    # Add RFC 5987 UTF-8 filename for mobile browsers & standard ASCII fallback
+    response.headers["Content-Disposition"] = f'attachment; filename="{clean_name}"; filename*=UTF-8\'\'{encoded_title}'
+    response.headers["Cache-Control"] = "no-cache"
+    return response
 
 
 @app.route("/api/downloads")

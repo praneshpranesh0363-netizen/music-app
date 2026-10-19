@@ -1949,12 +1949,18 @@
                 </div>
                 <div class="queue-row-actions" onclick="event.stopPropagation()">
                     <button class="btn-row-play" onclick="playSong(${playIdx})" title="Play on same page">&gt; Play</button>
-                    <button class="btn-row-download" onclick="startDownloadFlow('${song.videoId}', '${escapeHtml(song.title).replace(/'/g, "\\'")}', '${escapeHtml(song.artist).replace(/'/g, "\\'")}', '${song.artwork}')" title="Background MP3 Download">&#11015; Download</button>
+                    <button class="btn-row-download" onclick="downloadSongByIndex(${playIdx})" title="Background MP3 Download">&#11015; Download</button>
                     <button class="btn-row-add" onclick="promptAddToPlaylistByVideoId('${song.videoId}')" title="Add to Playlist">+</button>
                 </div>
             </div>
             `;
         }).join('');
+    }
+
+    function downloadSongByIndex(idx) {
+        const song = currentQueue[idx];
+        if (!song) return;
+        startDownloadFlow(song.videoId, song.title, song.artist, song.artwork);
     }
 
     function updateQueueHighlight() {
@@ -2152,55 +2158,91 @@
     // ========================================================
     let currentDownloadedFileUrl = null;
 
-    function downloadOnSamePage(fileUrl, filename) {
+    async function downloadOnSamePage(fileUrl, filename) {
         if (!fileUrl) return;
 
         let cleanName = (filename || 'song.mp3').trim();
         if (!cleanName.toLowerCase().endsWith('.mp3')) cleanName += '.mp3';
 
-        // Update direct download button with mobile-compatible href & download attributes
+        currentDownloadedFileUrl = fileUrl;
+
+        // Display completion elements
+        const completeBox = document.getElementById('dlCompleteBox');
+        const completeFilename = document.getElementById('dlCompleteFilename');
+        if (completeBox) completeBox.style.display = 'block';
+        if (completeFilename) completeFilename.textContent = cleanName;
+
         const directBtn = document.getElementById('directMp3LinkBtn');
+        const saveBtn = document.getElementById('saveFileBtn');
+
         if (directBtn) {
             directBtn.href = fileUrl;
             directBtn.setAttribute('download', cleanName);
             directBtn.style.display = 'block';
-            directBtn.innerHTML = `⬇ Tap Here to Download "${escapeHtml(cleanName)}"`;
-        }
-
-        const saveBtn = document.getElementById('saveFileBtn');
-        if (saveBtn) {
-            saveBtn.textContent = '✓ Download MP3 to Phone';
-            saveBtn.style.background = 'linear-gradient(135deg, #11998e, #38ef7d)';
-            saveBtn.onclick = function() {
-                triggerNativeDownload(fileUrl, cleanName);
+            directBtn.innerHTML = `⬇ Tap Here to Save "${escapeHtml(cleanName)}" to Phone`;
+            directBtn.onclick = function() {
+                triggerNativeDownload(currentDownloadedFileUrl || fileUrl, cleanName);
             };
         }
 
-        // Trigger native download
+        if (saveBtn) {
+            saveBtn.textContent = '✓ Save MP3 to Phone';
+            saveBtn.style.background = 'linear-gradient(135deg, #11998e, #38ef7d)';
+            saveBtn.onclick = function() {
+                triggerNativeDownload(currentDownloadedFileUrl || fileUrl, cleanName);
+            };
+        }
+
+        // Convert to local Blob URL for 100% same-origin mobile download
+        try {
+            const resp = await fetch(fileUrl);
+            if (resp.ok) {
+                const blob = await resp.blob();
+                const blobUrl = URL.createObjectURL(blob);
+                currentDownloadedFileUrl = blobUrl;
+                if (directBtn) {
+                    directBtn.href = blobUrl;
+                }
+                triggerNativeDownload(blobUrl, cleanName);
+                return;
+            }
+        } catch (e) {
+            console.log("Direct blob creation skipped, using native fileUrl:", e);
+        }
+
+        // Direct fallback trigger
         triggerNativeDownload(fileUrl, cleanName);
     }
 
     function triggerNativeDownload(fileUrl, filename) {
-        // Direct anchor download
-        const a = document.createElement('a');
-        a.href = fileUrl;
-        a.setAttribute('download', filename);
-        a.style.display = 'none';
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => { if (a.parentNode) a.parentNode.removeChild(a); }, 4000);
-
-        // Silent iframe download trigger
         try {
-            let ifr = document.getElementById('hiddenDownloadIframe');
-            if (!ifr) {
-                ifr = document.createElement('iframe');
-                ifr.id = 'hiddenDownloadIframe';
-                ifr.style.display = 'none';
-                document.body.appendChild(ifr);
-            }
-            ifr.src = fileUrl;
-        } catch(e) {}
+            const a = document.createElement('a');
+            a.href = fileUrl;
+            a.download = filename;
+            // No target='_blank' - keeps user strictly on the same page
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                if (a.parentNode) a.parentNode.removeChild(a);
+            }, 3000);
+        } catch(e) {
+            console.warn("Trigger download failed:", e);
+        }
+
+        // Silent iframe download trigger for browsers blocking synthetic anchor clicks
+        if (!fileUrl.startsWith('blob:')) {
+            try {
+                let ifr = document.getElementById('hiddenDownloadIframe');
+                if (!ifr) {
+                    ifr = document.createElement('iframe');
+                    ifr.id = 'hiddenDownloadIframe';
+                    ifr.style.display = 'none';
+                    document.body.appendChild(ifr);
+                }
+                ifr.src = fileUrl;
+            } catch(e) {}
+        }
     }
 
     function startDownloadFlow(videoId, songTitle, artist, thumb) {
@@ -2311,9 +2353,11 @@
             const taskId = res.task_id;
 
             if (downloadProgressTimer) clearInterval(downloadProgressTimer);
+            let pollFailures = 0;
             downloadProgressTimer = setInterval(async () => {
                 try {
                     const prog = await fetch(`${backendBase}/api/progress/${taskId}`).then(r => r.json());
+                    pollFailures = 0;
                     if (prog.percent) {
                         const pct = Math.min(100, Math.round(prog.percent));
                         document.getElementById('dlProgressFill').style.width = pct + '%';
@@ -2341,7 +2385,7 @@
 
                         setDownloadStep(4);
 
-                        // Trigger silent download on the EXACT same page (no navigation)
+                        // Trigger download on the EXACT same page (no navigation)
                         downloadOnSamePage(dlUrl, downloadFileName);
 
                         showToast(`🎉 "${song.title}" saved to your device Downloads!`);
@@ -2352,11 +2396,15 @@
                         runClientBackgroundDownload(videoId, song);
                     }
                 } catch (err) {
-                    clearInterval(downloadProgressTimer);
-                    downloadProgressTimer = null;
-                    runClientBackgroundDownload(videoId, song);
+                    pollFailures++;
+                    console.warn(`Progress poll failure (${pollFailures}/6):`, err);
+                    if (pollFailures >= 6) {
+                        clearInterval(downloadProgressTimer);
+                        downloadProgressTimer = null;
+                        runClientBackgroundDownload(videoId, song);
+                    }
                 }
-            }, 500);
+            }, 800);
 
         } catch (e) {
             runClientBackgroundDownload(videoId, song);
