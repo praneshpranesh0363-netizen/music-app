@@ -1121,7 +1121,7 @@
         </div>
 
         <!-- Direct In-Page MP3 Save Button -->
-        <button id="directMp3LinkBtn" onclick="saveCurrentDownloadDirect()" style="display:none; text-align:center; background:linear-gradient(135deg, #11998e, #38ef7d); border:none; color:#fff; padding:12px 18px; border-radius:12px; font-weight:800; font-size:0.95em; box-shadow:0 6px 20px rgba(56,239,125,0.4); margin-top:14px; width:100%; cursor:pointer; transition:transform 0.2s;">💾 Click Here to Save MP3 to Downloads</button>
+        <a id="directMp3LinkBtn" href="#" download="" style="display:none; text-decoration:none; text-align:center; background:linear-gradient(135deg, #11998e, #38ef7d); color:#fff; padding:12px 18px; border-radius:12px; font-weight:800; font-size:0.95em; box-shadow:0 6px 20px rgba(56,239,125,0.4); margin-top:14px; width:100%; cursor:pointer; transition:transform 0.2s;">⬇ Tap Here to Download MP3 to Phone</a>
 
         <!-- In-Page Download status info -->
         <div id="ghPagesNotice" style="display:none; background:rgba(102,126,234,0.15); border:1px solid rgba(102,126,234,0.4); border-radius:12px; padding:10px 14px; margin-top:12px; font-size:0.82em; color:#d1d5e4; line-height:1.45;">
@@ -1393,6 +1393,19 @@
 </div>
 
 <script>
+    // Global Mobile & Desktop Backend Configuration
+    const LIVE_TUNNEL_URL = 'https://isle-clicks-dealers-yeah.trycloudflare.com';
+
+    function getBackendBase() {
+        if (window.location.hostname.includes('trycloudflare.com')) {
+            return '';
+        }
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.port === '8080') {
+            return '';
+        }
+        return LIVE_TUNNEL_URL;
+    }
+
     const nativeAudio = document.getElementById('nativeAudio');
     let ytPlayer = null;
     let isYtFallback = false;
@@ -1860,36 +1873,39 @@
         let cleanName = (filename || 'song.mp3').trim();
         if (!cleanName.toLowerCase().endsWith('.mp3')) cleanName += '.mp3';
 
-        // 1. In-memory fetch blob download (completely avoids page navigation and keeps music playing)
-        try {
-            fetch(fileUrl)
-                .then(res => {
-                    if (!res.ok) throw new Error('Fetch failed');
-                    return res.blob();
-                })
-                .then(blob => {
-                    const blobUrl = URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = blobUrl;
-                    link.download = cleanName;
-                    link.style.display = 'none';
-                    document.body.appendChild(link);
-                    link.click();
-                    setTimeout(() => {
-                        URL.revokeObjectURL(blobUrl);
-                        if (link.parentNode) link.parentNode.removeChild(link);
-                    }, 6000);
-                })
-                .catch(() => {
-                    silentIframeDownload(fileUrl, cleanName);
-                });
-            return;
-        } catch(e) {
-            silentIframeDownload(fileUrl, cleanName);
+        // Update direct download button with mobile-compatible href & download attributes
+        const directBtn = document.getElementById('directMp3LinkBtn');
+        if (directBtn) {
+            directBtn.href = fileUrl;
+            directBtn.setAttribute('download', cleanName);
+            directBtn.style.display = 'block';
+            directBtn.innerHTML = `⬇ Tap Here to Download "${escapeHtml(cleanName)}"`;
         }
+
+        const saveBtn = document.getElementById('saveFileBtn');
+        if (saveBtn) {
+            saveBtn.textContent = '✓ Download MP3 to Phone';
+            saveBtn.style.background = 'linear-gradient(135deg, #11998e, #38ef7d)';
+            saveBtn.onclick = function() {
+                triggerNativeDownload(fileUrl, cleanName);
+            };
+        }
+
+        // Trigger native download
+        triggerNativeDownload(fileUrl, cleanName);
     }
 
-    function silentIframeDownload(fileUrl, filename) {
+    function triggerNativeDownload(fileUrl, filename) {
+        // Direct anchor download
+        const a = document.createElement('a');
+        a.href = fileUrl;
+        a.setAttribute('download', filename);
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { if (a.parentNode) a.parentNode.removeChild(a); }, 4000);
+
+        // Silent iframe download trigger
         try {
             let ifr = document.getElementById('hiddenDownloadIframe');
             if (!ifr) {
@@ -1900,14 +1916,6 @@
             }
             ifr.src = fileUrl;
         } catch(e) {}
-
-        const a = document.createElement('a');
-        a.href = fileUrl;
-        a.setAttribute('download', filename || 'song.mp3');
-        a.style.display = 'none';
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => { if (a.parentNode) a.parentNode.removeChild(a); }, 3000);
     }
 
     function startDownloadFlow(videoId, songTitle, artist, thumb) {
@@ -1934,17 +1942,9 @@
         if (saveBtn) {
             saveBtn.textContent = '💾 Save MP3 Now';
             saveBtn.style.background = 'linear-gradient(135deg, #11998e, #38ef7d)';
-        }
-
-        // Universal Backend Base URL (supports Localhost, Cloudflare Mobile Tunnel, and Mobile GitHub Pages)
-        function getBackendBase() {
-            if (window.location.hostname === 'localhost' || 
-                window.location.hostname === '127.0.0.1' || 
-                window.location.port === '8080' || 
-                window.location.hostname.includes('trycloudflare.com')) {
-                return '';
-            }
-            return 'https://isle-clicks-dealers-yeah.trycloudflare.com';
+            saveBtn.onclick = function() {
+                saveCurrentDownloadDirect();
+            };
         }
 
         // Reset step states
@@ -2058,13 +2058,6 @@
 
                         // Trigger silent download on the EXACT same page (no navigation)
                         downloadOnSamePage(dlUrl, downloadFileName);
-
-                        // Display direct in-page save button
-                        const directBtn = document.getElementById('directMp3LinkBtn');
-                        if (directBtn) {
-                            directBtn.style.display = 'block';
-                            directBtn.innerHTML = `💾 Click to Re-Save "${escapeHtml(song.title)}.mp3" to Downloads`;
-                        }
 
                         showToast(`🎉 "${song.title}" saved to your device Downloads!`);
                     } else if (prog.status === 'error') {
