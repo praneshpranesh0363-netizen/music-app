@@ -4,6 +4,7 @@ import glob
 import uuid
 import shutil
 import threading
+import urllib.parse
 from flask import Flask, render_template, request, jsonify, send_file
 import yt_dlp
 
@@ -96,6 +97,56 @@ def download_song(url, task_id):
         }
 
 
+def extract_playlist_songs(query, limit=35):
+    """
+    Extract individual songs line-by-line from a YouTube playlist
+    when searching with terms like 'playlist', 'album', or full playlist URL.
+    """
+    try:
+        clean_q = query.lower()
+        for word in ["playlist", "album"]:
+            clean_q = clean_q.replace(word, "")
+        clean_q = clean_q.strip() or query
+
+        if "list=" in query:
+            url = query
+            pl_title = "Playlist"
+        else:
+            search_url = f"https://www.youtube.com/results?search_query={urllib.parse.quote_plus(clean_q)}&sp=EgIQAw%253D%253D"
+            ydl_opts_search = {"quiet": True, "no_warnings": True, "extract_flat": True}
+            with yt_dlp.YoutubeDL(ydl_opts_search) as ydl:
+                res = ydl.extract_info(search_url, download=False)
+                entries = res.get("entries", [])
+                if not entries:
+                    return None, []
+                top_pl = entries[0]
+                pl_id = top_pl.get("id")
+                pl_title = top_pl.get("title", "Playlist")
+                url = top_pl.get("url") if (top_pl.get("url") and "playlist" in top_pl.get("url")) else f"https://www.youtube.com/playlist?list={pl_id}"
+
+        ydl_opts_pl = {"quiet": True, "no_warnings": True, "extract_flat": True, "playlistend": limit}
+        with yt_dlp.YoutubeDL(ydl_opts_pl) as ydl:
+            res = ydl.extract_info(url, download=False)
+            songs = []
+            for e in res.get("entries", []):
+                if e and e.get("id"):
+                    vid = e.get("id")
+                    songs.append({
+                        "id": vid,
+                        "videoId": vid,
+                        "title": e.get("title", "Song"),
+                        "url": f"https://www.youtube.com/watch?v={vid}",
+                        "duration": e.get("duration") or 240,
+                        "channel": e.get("uploader") or e.get("channel") or "Unknown Artist",
+                        "thumbnail": f"https://i.ytimg.com/vi/{vid}/hqdefault.jpg"
+                    })
+            extracted_title = res.get("title") or pl_title
+            return extracted_title, songs
+    except Exception as e:
+        print(f"Error extracting playlist: {e}")
+        return None, []
+
+
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -103,13 +154,23 @@ def index():
 
 @app.route("/api/search", methods=["POST"])
 def search_songs():
-    """Search for songs on YouTube."""
+    """Search for songs or playlist tracks on YouTube."""
     data = request.get_json() or {}
     query = data.get("query", "").strip()
     if not query:
         return jsonify({"error": "Please provide a search query"}), 400
 
     try:
+        # Check if user is searching for a playlist or album
+        is_playlist_query = any(k in query.lower() for k in ["playlist", "album", "list="])
+        if is_playlist_query:
+            pl_title, pl_songs = extract_playlist_songs(query, limit=35)
+            if pl_songs and len(pl_songs) > 0:
+                return jsonify({
+                    "playlist_title": pl_title,
+                    "results": pl_songs
+                })
+
         ydl_opts = {
             "quiet": True,
             "no_warnings": True,

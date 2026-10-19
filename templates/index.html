@@ -1529,12 +1529,13 @@
         btn.innerHTML = '<span class="spinner"></span>';
         queueTitle.textContent = `${query}`;
         queueMeta.textContent = `Searching line-by-line playlist songs...`;
-        queueList.innerHTML = '<div class="empty-state"><span class="spinner"></span><p style="margin-top:10px">Loading line-by-line songs...</p></div>';
+        queueList.innerHTML = '<div class="empty-state"><span class="spinner"></span><p style="margin-top:10px">Extracting line-by-line songs...</p></div>';
 
         const backendBase = (typeof getBackendBase === 'function') ? getBackendBase() : '';
         let songs = [];
+        let extractedPlaylistTitle = '';
 
-        // 1. Query Python backend (yt-dlp) for 25 high-quality YouTube tracks
+        // 1. Query Python backend (yt-dlp) for songs or full extracted playlist
         try {
             const res = await fetch(`${backendBase}/api/search`, {
                 method: 'POST',
@@ -1543,6 +1544,9 @@
             }).then(r => r.json());
 
             if (res && Array.isArray(res.results) && res.results.length > 0) {
+                if (res.playlist_title) {
+                    extractedPlaylistTitle = res.playlist_title;
+                }
                 songs = res.results.map(s => {
                     const vid = s.videoId || s.id || (s.url ? (s.url.includes('v=') ? s.url.split('v=')[1].split('&')[0] : s.url) : '');
                     const thumb = s.thumbnail || `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`;
@@ -1559,8 +1563,9 @@
             console.warn("Backend search failed, trying public search:", e);
         }
 
-        // 2. Public Invidious fallback
+        // 2. Public Invidious fallback (supports playlist search if "playlist" in query)
         if (songs.length === 0) {
+            const isPlaylistSearch = query.toLowerCase().includes('playlist');
             const publicInstances = [
                 'https://inv.nadeko.net',
                 'https://invidious.nerdvpn.de',
@@ -1568,6 +1573,24 @@
             ];
             for (const inst of publicInstances) {
                 try {
+                    if (isPlaylistSearch) {
+                        const plSearchRes = await fetch(`${inst}/api/v1/search?q=${encodeURIComponent(query)}&type=playlist`).then(r => r.json());
+                        if (Array.isArray(plSearchRes) && plSearchRes.length > 0) {
+                            const topPl = plSearchRes[0];
+                            extractedPlaylistTitle = topPl.title || query;
+                            const plDetail = await fetch(`${inst}/api/v1/playlists/${topPl.playlistId}`).then(r => r.json());
+                            if (plDetail && Array.isArray(plDetail.videos) && plDetail.videos.length > 0) {
+                                songs = plDetail.videos.map(v => registerSong({
+                                    title: v.title || 'Unknown Title',
+                                    artist: v.author || 'Unknown Artist',
+                                    artwork: (v.videoThumbnails && v.videoThumbnails[0]) ? v.videoThumbnails[0].url : `https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`,
+                                    videoId: v.videoId,
+                                    duration: v.lengthSeconds || 240
+                                }));
+                                break;
+                            }
+                        }
+                    }
                     const invRes = await fetch(`${inst}/api/v1/search?q=${encodeURIComponent(query)}&type=video`).then(r => r.json());
                     if (Array.isArray(invRes) && invRes.length > 0) {
                         songs = invRes.map(s => {
@@ -1594,9 +1617,11 @@
             return;
         }
 
-        activePlaylistInfo = { title: query, author: 'Playlist Songs', total: songs.length };
+        const displayTitle = extractedPlaylistTitle || query;
+        queueTitle.textContent = displayTitle;
+        activePlaylistInfo = { title: displayTitle, author: 'Playlist Songs', total: songs.length };
         currentQueue = songs;
-        queueMeta.textContent = `Songs Playlist &bull; ${currentQueue.length} Tracks Available`;
+        queueMeta.textContent = `${currentQueue.length} Songs in Playlist • 100% Ad-Free • In-Page MP3 Downloads`;
         renderQueueItems();
 
         btn.disabled = false;
@@ -1728,6 +1753,23 @@
         try {
             isYtFallback = false;
             let audioUrl = streamCache[song.videoId];
+
+            if (!audioUrl) {
+                const backendBase = (typeof getBackendBase === 'function') ? getBackendBase() : '';
+                try {
+                    const stRes = await fetch(`${backendBase}/api/stream`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url: song.videoId })
+                    }).then(r => r.json());
+                    if (stRes && stRes.stream_url) {
+                        audioUrl = stRes.stream_url;
+                        streamCache[song.videoId] = audioUrl;
+                    }
+                } catch (beErr) {
+                    console.log("Backend stream endpoint skipped:", beErr);
+                }
+            }
 
             if (!audioUrl) {
                 const res = await fetch(`https://invidious.f5.si/api/v1/videos/${song.videoId}`).then(r => r.json());
