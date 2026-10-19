@@ -983,66 +983,33 @@
 <div id="toastNotification" class="toast-box"></div>
 
 <div class="container">
-    <div class="header">
-        <div class="badge">Music Download App &bull; Search &bull; Play &bull; Download &bull; All in One Page</div>
-        <h1>MusicFlow</h1>
-        <p>100% Ad-Free Music Streaming & Background MP3 Downloads Directly to Device Storage</p>
-
-        <!-- Top Action Bar -->
-        <div class="header-actions">
-            <button class="btn-flowchart" onclick="openFlowDiagramModal()">
-                <span>📊</span>
-                <span>View Project Flow Diagram</span>
-            </button>
-            <div class="badge-adshield">
-                <span>🛡️</span>
-                <span>Active 80ms Ad-Shield (0 Ads)</span>
-            </div>
-        </div>
+    <div class="header" style="text-align:center; padding: 10px 0 14px 0;">
+        <h1 style="font-size:2em; font-weight:800; margin-bottom:4px; background:linear-gradient(90deg, #ff719a, #ff9068, #fcd000); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">🎵 MusicFlow</h1>
+        <p style="font-size:0.84em; color:var(--text-muted); margin:0;">100% Ad-Free Music &bull; Direct MP3 Downloads</p>
     </div>
 
-    <!-- Navigation Tabs -->
-    <div class="nav-tabs">
-        <button class="nav-btn active" id="tabSearchBtn" onclick="switchMainTab('search')">&#128269; Explore & Search</button>
-        <button class="nav-btn" id="tabMyPlaylistsBtn" onclick="switchMainTab('myplaylists')">&#128194; My Saved Playlists</button>
-    </div>
-
-    <!-- SEARCH VIEW -->
+    <!-- SEARCH VIEW: JUST SEARCH BAR AT TOP -->
     <div id="searchView">
         <div class="search-container">
             <input type="text" id="searchInput" class="search-input"
                    placeholder="Search any song, artist, album, or playlist..."
+                   value="Kannada Best Melody Songs playlist"
                    onkeypress="if(event.key==='Enter') performSearch()">
-            <button class="search-submit" id="searchBtn" onclick="performSearch()">Search</button>
-        </div>
-
-        <!-- Quick Tag Pills -->
-        <div class="tags-row">
-            <div class="tag-pill" onclick="quickSearch('Kannada Best Melody Songs playlist')">&#127926; Kannada Melody Playlist</div>
-            <div class="tag-pill" onclick="quickSearch('Manithan Aval song')">&#128293; Aval (Full Song)</div>
-            <div class="tag-pill" onclick="quickSearch('Anirudh hits playlist')">&#127911; Anirudh Hits</div>
-            <div class="tag-pill" onclick="quickSearch('Tamil melody songs playlist')">&#10024; Tamil Melody</div>
-            <div class="tag-pill" onclick="quickSearch('Hindi romantic songs playlist')">&#128147; Hindi Romantic</div>
-            <div class="tag-pill" onclick="quickSearch('Lo-fi chill beats')">&#9749; Lo-Fi Beats</div>
-        </div>
-
-        <!-- PLAYLIST CHIPS SECTION (WHEN PLAYLISTS ARE FOUND) -->
-        <div id="playlistChipsSection" class="playlist-chips-section">
-            <div class="playlist-chips-label">&#128191; Found Playlists & Albums (Click to load all tracks):</div>
-            <div class="playlist-chips-row" id="playlistChipsRow"></div>
+            <button class="search-submit" id="searchBtn" onclick="performSearch()">🔍 Search</button>
         </div>
 
         <!-- LINE-BY-LINE NUMBERED PLAYLIST VIEW (WITH DUAL PLAY & DOWNLOAD ACTIONS) -->
         <div id="playlistQueueBox" class="playlist-queue-box">
             <div class="queue-header">
                 <div class="queue-top-row">
-                    <div class="queue-title" id="queueTitle">Kannada Best Melody Songs</div>
+                    <div class="queue-title" id="queueTitle">Kannada Best Melody Songs Playlist</div>
                 </div>
                 <div class="queue-meta" id="queueMeta">Loading songs...</div>
                 <div class="queue-actions-row">
-                    <button class="btn-play-all" onclick="playAllQueue()">&#9654; Play All</button>
-                    <button class="queue-icon-btn" id="repeatBtn" onclick="toggleRepeat()" title="Repeat">&#128257; Repeat</button>
-                    <button class="queue-icon-btn" id="shuffleBtn" onclick="toggleShuffle()" title="Shuffle">&#128256; Shuffle</button>
+                    <button class="btn-play-all" onclick="playAllQueue()">▶ Play All</button>
+                    <button class="queue-icon-btn" id="repeatBtn" onclick="toggleRepeat()" title="Repeat">🔁 Repeat</button>
+                    <button class="queue-icon-btn" id="shuffleBtn" onclick="toggleShuffle()" title="Shuffle">🔀 Shuffle</button>
+                    <button class="queue-icon-btn" onclick="openFlowDiagramModal()" title="View Architecture Flowchart">📊 Flow</button>
                 </div>
             </div>
             <!-- Numbered Line-by-Line Songs List -->
@@ -1557,68 +1524,83 @@
         const queueList = document.getElementById('queueList');
         const queueTitle = document.getElementById('queueTitle');
         const queueMeta = document.getElementById('queueMeta');
-        const chipsSection = document.getElementById('playlistChipsSection');
-        const chipsRow = document.getElementById('playlistChipsRow');
 
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner"></span>';
-        queueTitle.textContent = `Search: "${query}"`;
-        queueMeta.textContent = `Searching 100% ad-free full songs...`;
+        queueTitle.textContent = `${query}`;
+        queueMeta.textContent = `Searching line-by-line playlist songs...`;
         queueList.innerHTML = '<div class="empty-state"><span class="spinner"></span><p style="margin-top:10px">Loading line-by-line songs...</p></div>';
 
+        const backendBase = (typeof getBackendBase === 'function') ? getBackendBase() : '';
+        let songs = [];
+
+        // 1. Query Python backend (yt-dlp) for 25 high-quality YouTube tracks
         try {
-            const invidiousBase = 'https://invidious.f5.si';
+            const res = await fetch(`${backendBase}/api/search`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query })
+            }).then(r => r.json());
 
-            const [songsRes, playlistsRes] = await Promise.all([
-                fetch(`${invidiousBase}/api/v1/search?q=${encodeURIComponent(query)}&type=video`).then(r => r.json()).catch(() => []),
-                fetch(`${invidiousBase}/api/v1/search?q=${encodeURIComponent(query + ' playlist')}&type=playlist`).then(r => r.json()).catch(() => [])
-            ]);
-
-            const songs = Array.isArray(songsRes) ? songsRes : [];
-            const playlists = Array.isArray(playlistsRes) ? playlistsRes : [];
-
-            // Render playlist chips if found
-            if (playlists.length > 0) {
-                chipsSection.style.display = 'block';
-                chipsRow.innerHTML = playlists.slice(0, 10).map(pl => `
-                    <div class="playlist-chip" onclick="openPlaylistQueue('${pl.playlistId}', '${escapeHtml(pl.title)}', '${escapeHtml(pl.author || 'Playlist')}')">
-                        <span>&#128191;</span>
-                        <span>${escapeHtml(pl.title)}</span>
-                        <span style="opacity:0.7;">(${pl.videoCount || 'Full'})</span>
-                    </div>
-                `).join('');
-            } else {
-                chipsSection.style.display = 'none';
-            }
-
-            if (songs.length === 0) {
-                queueList.innerHTML = '<div class="empty-state"><p>No songs found for this search. Try another title or artist.</p></div>';
-                queueMeta.textContent = '0 songs found';
-                return;
-            }
-
-            activePlaylistInfo = { title: query, author: 'Search Results', total: songs.length };
-
-            currentQueue = songs.map(s => {
-                const thumb = (s.videoThumbnails && s.videoThumbnails[0]) ? s.videoThumbnails[0].url : `https://i.ytimg.com/vi/${s.videoId}/hqdefault.jpg`;
-                return registerSong({
-                    title: s.title || 'Unknown Title',
-                    artist: s.author || 'Unknown Artist',
-                    artwork: thumb,
-                    videoId: s.videoId,
-                    duration: s.lengthSeconds || 240
+            if (res && Array.isArray(res.results) && res.results.length > 0) {
+                songs = res.results.map(s => {
+                    const vid = s.videoId || s.id || (s.url ? (s.url.includes('v=') ? s.url.split('v=')[1].split('&')[0] : s.url) : '');
+                    const thumb = s.thumbnail || `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`;
+                    return registerSong({
+                        title: s.title || 'Unknown Title',
+                        artist: s.channel || 'Unknown Artist',
+                        artwork: thumb,
+                        videoId: vid,
+                        duration: s.duration || 240
+                    });
                 });
-            });
-
-            queueMeta.textContent = `Search Results - 1 / ${currentQueue.length}`;
-            renderQueueItems();
-
+            }
         } catch (e) {
-            queueList.innerHTML = `<div class="empty-state">&#10060; Error loading songs: ${escapeHtml(e.message)}</div>`;
-        } finally {
-            btn.disabled = false;
-            btn.textContent = 'Search';
+            console.warn("Backend search failed, trying public search:", e);
         }
+
+        // 2. Public Invidious fallback
+        if (songs.length === 0) {
+            const publicInstances = [
+                'https://inv.nadeko.net',
+                'https://invidious.nerdvpn.de',
+                'https://invidious.f5.si'
+            ];
+            for (const inst of publicInstances) {
+                try {
+                    const invRes = await fetch(`${inst}/api/v1/search?q=${encodeURIComponent(query)}&type=video`).then(r => r.json());
+                    if (Array.isArray(invRes) && invRes.length > 0) {
+                        songs = invRes.map(s => {
+                            const thumb = (s.videoThumbnails && s.videoThumbnails[0]) ? s.videoThumbnails[0].url : `https://i.ytimg.com/vi/${s.videoId}/hqdefault.jpg`;
+                            return registerSong({
+                                title: s.title || 'Unknown Title',
+                                artist: s.author || 'Unknown Artist',
+                                artwork: thumb,
+                                videoId: s.videoId,
+                                duration: s.lengthSeconds || 240
+                            });
+                        });
+                        break;
+                    }
+                } catch(err) {}
+            }
+        }
+
+        if (songs.length === 0) {
+            queueList.innerHTML = '<div class="empty-state"><p>No songs found for this search. Please try another query.</p></div>';
+            queueMeta.textContent = '0 songs found';
+            btn.disabled = false;
+            btn.textContent = '🔍 Search';
+            return;
+        }
+
+        activePlaylistInfo = { title: query, author: 'Playlist Songs', total: songs.length };
+        currentQueue = songs;
+        queueMeta.textContent = `Songs Playlist &bull; ${currentQueue.length} Tracks Available`;
+        renderQueueItems();
+
+        btn.disabled = false;
+        btn.textContent = '🔍 Search';
     }
 
     // ========================================================

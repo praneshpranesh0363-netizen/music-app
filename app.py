@@ -114,20 +114,34 @@ def search_songs():
             "quiet": True,
             "no_warnings": True,
             "extract_flat": True,
-            "default_search": "ytsearch12",
+            "default_search": "ytsearch25",
         }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            results = ydl.extract_info(f"ytsearch12:{query}", download=False)
+            results = ydl.extract_info(f"ytsearch25:{query}", download=False)
 
         songs = []
         for entry in results.get("entries", []):
             if entry:
+                vid = entry.get("id")
+                url = entry.get("url", "")
+                if not vid:
+                    if "v=" in url:
+                        vid = url.split("v=")[-1].split("&")[0]
+                    else:
+                        vid = url
+                thumb = ""
+                if entry.get("thumbnails"):
+                    thumb = entry["thumbnails"][-1].get("url", "")
+                if not thumb and vid:
+                    thumb = f"https://i.ytimg.com/vi/{vid}/hqdefault.jpg"
                 songs.append({
+                    "id": vid,
+                    "videoId": vid,
                     "title": entry.get("title", "Unknown"),
-                    "url": entry.get("url", ""),
-                    "duration": entry.get("duration"),
+                    "url": url,
+                    "duration": entry.get("duration") or 240,
                     "channel": entry.get("channel") or entry.get("uploader", "Unknown Artist"),
-                    "thumbnail": entry.get("thumbnails", [{}])[-1].get("url", "") if entry.get("thumbnails") else "",
+                    "thumbnail": thumb,
                 })
 
         return jsonify({"results": songs})
