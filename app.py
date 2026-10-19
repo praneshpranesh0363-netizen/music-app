@@ -236,9 +236,13 @@ def download_song(url, task_id):
             }
 
     except Exception as e:
+        import traceback
+        tb_str = traceback.format_exc()
+        print(f"DOWNLOAD ERROR:\n{tb_str}", flush=True)
         progress_store[task_id] = {
             "status": "error",
             "message": str(e),
+            "traceback": tb_str
         }
     finally:
         with active_downloads_lock:

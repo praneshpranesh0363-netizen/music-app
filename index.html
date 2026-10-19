@@ -1294,7 +1294,7 @@
         </div>
 
         <!-- Direct In-Page MP3 Save Button -->
-        <a id="directMp3LinkBtn" href="#" download="" style="display:none; text-decoration:none; text-align:center; background:linear-gradient(135deg, #11998e, #38ef7d); color:#fff; padding:12px 18px; border-radius:12px; font-weight:800; font-size:0.95em; box-shadow:0 6px 20px rgba(56,239,125,0.4); margin-top:14px; width:100%; cursor:pointer; transition:transform 0.2s;">⬇ Tap Here to Save MP3 to Phone</a>
+        <a id="directMp3LinkBtn" href="#" download="" style="display:none; text-decoration:none; text-align:center; background:linear-gradient(135deg, #11998e, #38ef7d); color:#fff; padding:13px 18px; border-radius:12px; font-weight:800; font-size:0.98em; box-shadow:0 6px 20px rgba(56,239,125,0.4); margin-top:14px; width:100%; cursor:pointer; transition:transform 0.2s;">⬇ Tap Here to Save MP3 to Phone / Laptop</a>
 
         <div style="display:flex; align-items:center; justify-content:space-between; margin-top:14px;">
             <button onclick="saveCurrentDownloadDirect()" id="saveFileBtn" style="background:linear-gradient(135deg, #11998e, #38ef7d); border:none; color:#fff; padding:8px 16px; border-radius:10px; font-size:0.84em; font-weight:700; cursor:pointer;">💾 Save MP3 Now</button>
@@ -1308,7 +1308,6 @@
         </div>
     </div>
 </div>
-<iframe id="hiddenDownloadIframe" style="display:none;" title="Silent In-Page Download"></iframe>
 
 <!-- ======================================================== -->
 <!-- PROJECT FLOW DIAGRAM MODAL (EXACT SPECIFICATION FROM IMAGE)-->
@@ -2300,9 +2299,9 @@
             directBtn.href = fileUrl;
             directBtn.setAttribute('download', cleanName);
             directBtn.style.display = 'block';
-            directBtn.innerHTML = `⬇ Tap Here to Save "${escapeHtml(cleanName)}" to Phone`;
+            directBtn.innerHTML = `⬇ Tap Here to Save "${escapeHtml(cleanName)}" to Device`;
             directBtn.onclick = function() {
-                triggerNativeDownload(currentDownloadedFileUrl || fileUrl, cleanName);
+                showToast(`💾 Saving "${escapeHtml(cleanName)}" to Downloads...`);
             };
         }
 
@@ -2321,11 +2320,10 @@
     function triggerNativeDownload(fileUrl, filename) {
         if (!fileUrl) return;
 
-        // Method 1: Invisible direct anchor trigger
         try {
             const a = document.createElement('a');
             a.href = fileUrl;
-            a.setAttribute('download', filename);
+            a.setAttribute('download', filename || 'song.mp3');
             a.style.display = 'none';
             document.body.appendChild(a);
             a.click();
@@ -2335,18 +2333,6 @@
         } catch(e) {
             console.warn("Anchor trigger error:", e);
         }
-
-        // Method 2: Hidden iframe download trigger (works in background on mobile & desktop)
-        try {
-            let ifr = document.getElementById('hiddenDownloadIframe');
-            if (!ifr) {
-                ifr = document.createElement('iframe');
-                ifr.id = 'hiddenDownloadIframe';
-                ifr.style.display = 'none';
-                document.body.appendChild(ifr);
-            }
-            ifr.src = fileUrl;
-        } catch(e) {}
     }
 
     function startDownloadFlow(videoId, songTitle, artist, thumb) {
@@ -2579,7 +2565,19 @@
                     const downloadFileName = `${safeTitle}.mp3`;
 
                     try {
-                        const directStream = streamCache[song.videoId];
+                        let directStream = streamCache[song.videoId];
+                        if (!directStream) {
+                            const backendBase = (typeof getBackendBase === 'function') ? getBackendBase() : '';
+                            const stRes = await fetch(`${backendBase}/api/stream`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ url: song.videoId })
+                            }).then(r => r.json());
+                            if (stRes && stRes.stream_url) {
+                                directStream = stRes.stream_url;
+                                streamCache[song.videoId] = directStream;
+                            }
+                        }
                         if (directStream) {
                             const audioRes = await fetch(directStream);
                             if (audioRes.ok) {
@@ -2610,8 +2608,9 @@
     function saveCurrentDownloadDirect() {
         if (currentDownloadedFileUrl) {
             const safeTitle = (currentDownloadSong && currentDownloadSong.title ? currentDownloadSong.title : 'song').replace(/[<>:"/\\|?*]+/g, '_');
-            downloadOnSamePage(currentDownloadedFileUrl, `${safeTitle}.mp3`);
-            showToast(`📁 Downloading "${safeTitle}.mp3" directly to device storage...`);
+            const cleanName = safeTitle.toLowerCase().endsWith('.mp3') ? safeTitle : `${safeTitle}.mp3`;
+            triggerNativeDownload(currentDownloadedFileUrl, cleanName);
+            showToast(`📁 Downloading "${cleanName}" directly to device storage...`);
             return;
         }
 
