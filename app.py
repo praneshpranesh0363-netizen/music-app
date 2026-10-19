@@ -44,11 +44,12 @@ def download_song(url, task_id):
     """Download audio and convert to MP3."""
     try:
         has_ffmpeg = shutil.which("ffmpeg") is not None
-        output_template = os.path.join(DOWNLOAD_DIR, f"{task_id}_%(title)s.%(ext)s")
+        output_template = os.path.join(DOWNLOAD_DIR, f"{task_id}.%(ext)s")
 
         ydl_opts = {
             "format": "bestaudio/best",
             "outtmpl": output_template,
+            "windowsfilenames": True,
             "progress_hooks": [lambda d: progress_hook(d, task_id)],
             "noplaylist": True,
             "quiet": True,
@@ -68,15 +69,19 @@ def download_song(url, task_id):
             info = ydl.extract_info(url, download=True)
             title = info.get("title", "Unknown Title")
 
-        pattern = os.path.join(DOWNLOAD_DIR, f"{task_id}_*")
+        pattern = os.path.join(DOWNLOAD_DIR, f"{task_id}.*")
         matches = glob.glob(pattern)
         if matches:
             filepath = matches[0]
+            safe_title = "".join(c for c in title if c.isalnum() or c in (" ", "-", "_", "(", ")", ".")).strip()
+            if not safe_title:
+                safe_title = "song"
             progress_store[task_id] = {
                 "status": "done",
                 "percent": 100,
                 "title": title,
                 "filename": os.path.basename(filepath),
+                "download_name": f"{safe_title}.mp3"
             }
         else:
             progress_store[task_id] = {
@@ -212,7 +217,11 @@ def serve_file(filename):
     """Serve a downloaded MP3 file."""
     filepath = os.path.join(DOWNLOAD_DIR, filename)
     if os.path.exists(filepath):
-        clean_name = filename.split("_", 1)[-1] if "_" in filename else filename
+        task_id = filename.split(".")[0]
+        info = progress_store.get(task_id, {})
+        clean_name = info.get("download_name")
+        if not clean_name:
+            clean_name = filename.split("_", 1)[-1] if "_" in filename else filename
         if not clean_name.lower().endswith(".mp3"):
             clean_name += ".mp3"
         try:
