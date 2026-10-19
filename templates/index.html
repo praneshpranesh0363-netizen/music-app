@@ -416,9 +416,9 @@
             background: #1a73e8;
             border: 1px solid #1a73e8;
             color: #fff;
-            padding: 6px 14px;
+            padding: 8px 16px;
             border-radius: 8px;
-            font-size: 0.82em;
+            font-size: 0.85em;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s;
@@ -436,26 +436,26 @@
         }
 
         .btn-row-download {
-            background: #8b5cf6;
-            border: 1px solid #8b5cf6;
+            background: linear-gradient(135deg, #8e2de2, #4a00e0);
+            border: 1px solid #7c3aed;
             color: #fff;
-            padding: 6px 14px;
+            padding: 8px 16px;
             border-radius: 8px;
-            font-size: 0.82em;
-            font-weight: 700;
+            font-size: 0.85em;
+            font-weight: 800;
             cursor: pointer;
             transition: all 0.2s;
             display: flex;
             align-items: center;
             gap: 5px;
             white-space: nowrap;
-            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.35);
+            box-shadow: 0 3px 10px rgba(142, 45, 226, 0.4);
         }
         .btn-row-download:hover {
-            background: #7c3aed;
-            border-color: #7c3aed;
+            background: linear-gradient(135deg, #9d3bf0, #5c0bf5);
+            border-color: #9d3bf0;
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.5);
+            box-shadow: 0 6px 16px rgba(142, 45, 226, 0.6);
         }
 
         /* ======================================================== */
@@ -1142,12 +1142,19 @@
             gap: 6px;
         }
 
+        @keyframes pulseGlow {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(56, 239, 125, 0.7); }
+            70% { transform: scale(1.02); box-shadow: 0 0 0 14px rgba(56, 239, 125, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(56, 239, 125, 0); }
+        }
+
         @media (max-width: 600px) {
             .header h1 { font-size: 1.8em; }
             .queue-thumb-box { width: 75px; height: 44px; }
             .player-time { display: none; }
             .queue-track-title { font-size: 0.86em; }
-            .btn-row-play, .btn-row-download { padding: 5px 8px; font-size: 0.72em; }
+            .btn-row-play { padding: 8px 11px; font-size: 0.8em; min-height: 38px; }
+            .btn-row-download { padding: 8px 12px; font-size: 0.8em; min-height: 38px; font-weight: 800; }
         }
     </style>
     <script src="https://www.youtube.com/iframe_api"></script>
@@ -1565,7 +1572,7 @@
             <button class="ctrl-btn" onclick="prevSong()" title="Previous">&#9198;</button>
             <button class="ctrl-play" id="playPauseBtn" onclick="togglePlayPause()">&#9654;</button>
             <button class="ctrl-btn" onclick="nextSong()" title="Next">&#9197;</button>
-            <button class="ctrl-btn" onclick="downloadCurrentSong()" title="Background Download MP3" style="color:#d1b5ff; font-size:1.15em;">&#11015;</button>
+            <button class="ctrl-btn" onclick="downloadCurrentSong()" title="Download Playing MP3" style="background:linear-gradient(135deg, #8e2de2, #4a00e0); color:#fff; border-radius:18px; padding:6px 14px; font-size:0.82em; font-weight:800; display:flex; align-items:center; gap:5px; cursor:pointer; box-shadow:0 3px 10px rgba(142,45,226,0.4);">&#11015; Download</button>
         </div>
     </div>
 </div>
@@ -1938,27 +1945,31 @@
             const playIdx = (originalIndex !== -1) ? originalIndex : i;
             const isActive = (playIdx === currentIndex);
             return `
-            <div class="queue-row ${isActive ? 'active' : ''}" id="qrow-${playIdx}" onclick="playSong(${playIdx})">
+            <div class="queue-row ${isActive ? 'active' : ''}" id="qrow-${playIdx}">
                 <div class="queue-num" id="qnum-${playIdx}">${isActive ? '&#9654;' : (i + 1)}</div>
-                <div class="queue-thumb-box">
+                <div class="queue-thumb-box" onclick="playSong(${playIdx})" style="cursor:pointer;" title="Tap to Play">
                     <img class="queue-thumb-img" src="${song.artwork}" alt="${escapeHtml(song.title)}" onerror="this.src='https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&h=60&fit=crop'">
                     <span class="queue-dur-badge">${formatDuration(song.duration)}</span>
                 </div>
-                <div class="queue-info">
+                <div class="queue-info" onclick="playSong(${playIdx})" style="cursor:pointer;" title="Tap to Play">
                     <div class="queue-track-title">${escapeHtml(song.title)}</div>
                     <div class="queue-track-author">${escapeHtml(song.artist)}</div>
                 </div>
                 <div class="queue-row-actions" onclick="event.stopPropagation()">
-                    <button class="btn-row-play" onclick="playSong(${playIdx})" title="Play on same page">&gt; Play</button>
-                    <button class="btn-row-download" onclick="downloadSongByIndex(${playIdx})" title="Background MP3 Download">&#11015; Download</button>
-                    <button class="btn-row-add" onclick="promptAddToPlaylistByVideoId('${song.videoId}')" title="Add to Playlist">+</button>
+                    <button class="btn-row-play" onclick="event.stopPropagation(); playSong(${playIdx})" title="Play on same page">&gt; Play</button>
+                    <button class="btn-row-download" onclick="event.stopPropagation(); downloadSongByIndex(${playIdx}, event)" title="Background MP3 Download">&#11015; Download</button>
+                    <button class="btn-row-add" onclick="event.stopPropagation(); promptAddToPlaylistByVideoId('${song.videoId}')" title="Add to Playlist">+</button>
                 </div>
             </div>
             `;
         }).join('');
     }
 
-    function downloadSongByIndex(idx) {
+    function downloadSongByIndex(idx, evt) {
+        if (evt) {
+            evt.stopPropagation();
+            if (evt.preventDefault) evt.preventDefault();
+        }
         const song = currentQueue[idx];
         if (!song) return;
         startDownloadFlow(song.videoId, song.title, song.artist, song.artwork);

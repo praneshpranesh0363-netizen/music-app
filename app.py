@@ -313,6 +313,9 @@ def extract_playlist_songs(query, limit=75):
 @app.before_request
 def security_before_request():
     """Security filter: rate limits, IP tracking, and request size validation."""
+    if request.method == "OPTIONS":
+        return "", 204
+
     client_ip = (
         request.headers.get("CF-Connecting-IP")
         or request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
@@ -320,19 +323,19 @@ def security_before_request():
         or "127.0.0.1"
     )
 
-    # Rate limiting on API search endpoints (40 searches / minute per IP)
+    # Rate limiting on API search endpoints (60 searches / minute per IP)
     if request.path == "/api/search":
-        if not check_rate_limit(f"{client_ip}:search", max_requests=40, window_seconds=60):
+        if not check_rate_limit(f"{client_ip}:search", max_requests=60, window_seconds=60):
             return jsonify({"error": "Too many searches. Please slow down and wait a minute."}), 429
 
-    # Rate limiting on API download initiation (6 downloads / minute per IP)
+    # Rate limiting on API download initiation (30 downloads / minute per IP)
     elif request.path == "/api/download":
-        if not check_rate_limit(f"{client_ip}:download", max_requests=6, window_seconds=60):
+        if not check_rate_limit(f"{client_ip}:download", max_requests=30, window_seconds=60):
             return jsonify({"error": "Too many download requests. Please wait a minute before starting another."}), 429
 
-    # Rate limiting on streaming extraction (30 streams / minute per IP)
+    # Rate limiting on streaming extraction (60 streams / minute per IP)
     elif request.path == "/api/stream":
-        if not check_rate_limit(f"{client_ip}:stream", max_requests=30, window_seconds=60):
+        if not check_rate_limit(f"{client_ip}:stream", max_requests=60, window_seconds=60):
             return jsonify({"error": "Too many stream requests. Please wait a moment."}), 429
 
 
@@ -376,9 +379,11 @@ def index():
     return render_template("index.html")
 
 
-@app.route("/api/search", methods=["POST"])
+@app.route("/api/search", methods=["POST", "OPTIONS"])
 def search_songs():
     """Search for songs or full playlist tracks on YouTube (up to 75 songs for playlists, 50 for songs)."""
+    if request.method == "OPTIONS":
+        return "", 204
     data = request.get_json(silent=True) or {}
     raw_query = data.get("query", "")
     if not raw_query or not isinstance(raw_query, str):
@@ -388,6 +393,8 @@ def search_songs():
     query = re.sub(r'[\x00-\x1f\x7f]', '', raw_query).strip()[:120]
     if not query:
         return jsonify({"error": "Invalid search query"}), 400
+
+    print(f"🔍 SEARCH: '{query}'", flush=True)
 
     try:
         # Check if user is searching for a playlist, album, or direct playlist link
@@ -445,14 +452,18 @@ def search_songs():
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/api/stream", methods=["POST"])
+@app.route("/api/stream", methods=["POST", "OPTIONS"])
 def stream_song():
     """Extract direct audio stream URL with SSRF protection."""
+    if request.method == "OPTIONS":
+        return "", 204
     data = request.get_json(silent=True) or {}
     raw_url = data.get("url", "")
     safe_url = validate_youtube_target(raw_url)
     if not safe_url:
         return jsonify({"error": "Invalid audio URL. Only legitimate YouTube links are permitted."}), 400
+
+    print(f"▶ STREAM: '{raw_url}' -> '{safe_url}'", flush=True)
 
     try:
         ydl_opts = {
@@ -483,9 +494,11 @@ def stream_song():
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/api/download", methods=["POST"])
+@app.route("/api/download", methods=["POST", "OPTIONS"])
 def start_download():
     """Start downloading a song with concurrency & security safeguards."""
+    if request.method == "OPTIONS":
+        return "", 204
     # Check concurrent downloads limit
     with active_downloads_lock:
         if active_downloads_count >= MAX_CONCURRENT_DOWNLOADS:
@@ -498,6 +511,7 @@ def start_download():
         return jsonify({"error": "Invalid URL. Only legitimate YouTube audio links are permitted."}), 400
 
     task_id = str(uuid.uuid4())[:8]
+    print(f"📥 DOWNLOAD REQUEST: '{raw_url}' -> '{safe_url}' (task_id: {task_id})", flush=True)
     progress_store[task_id] = {"status": "starting", "percent": 0}
 
     thread = threading.Thread(target=download_song, args=(safe_url, task_id))
@@ -523,6 +537,7 @@ def serve_file(filename):
     Serve a downloaded MP3 file safely.
     Blocks directory traversal and path manipulation attacks.
     """
+    print(f"📦 SERVE FILE REQUEST: '{filename}'", flush=True)
     # 1. Path Traversal Guard: reject null bytes, directory slashes, or non-matching names
     if ".." in filename or "/" in filename or "\\" in filename or "\x00" in filename:
         return jsonify({"error": "Invalid file request"}), 400
