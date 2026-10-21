@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="referrer" content="strict-origin-when-cross-origin">
-    <title>MusicFlow - Search • Play • Download • All in One Page</title>
+    <title>Echo Music - Stream &amp; Download • Ad-Free Audio Engine</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -1157,28 +1157,26 @@
             .btn-row-download { padding: 8px 12px; font-size: 0.8em; min-height: 38px; font-weight: 800; }
         }
     </style>
-    <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
 <!-- Hidden Native Audio Engine for 100% Ad-Free Audio (Optimized for Lock-Screen & Background Playback) -->
 <audio id="nativeAudio" preload="auto" playsinline webkit-playsinline="true" x-webkit-airplay="allow"></audio>
-<div id="yt-player-box" style="position:fixed; bottom:0; right:0; width:1px; height:1px; opacity:0.01; pointer-events:none;"><div id="yt-player"></div></div>
 
 <!-- Toast for In-Page Status & Feedback -->
 <div id="toastNotification" class="toast-box"></div>
 
 <div class="container">
     <div class="header" style="text-align:center; padding: 10px 0 14px 0;">
-        <h1 style="font-size:2.1em; font-weight:800; margin-bottom:4px; background:linear-gradient(90deg, #ff719a, #ff9068, #fcd000); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">🎵 Music Zone</h1>
-        <p style="font-size:0.86em; color:var(--text-muted); margin:0;">100% Ad-Free Music &bull; Direct MP3 Downloads &bull; All in One Page</p>
+        <h1 style="font-size:2.1em; font-weight:800; margin-bottom:4px; background:linear-gradient(90deg, #38ef7d, #00d2ff, #9d3bf0); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">🎵 Echo Music</h1>
+        <p style="font-size:0.86em; color:var(--text-muted); margin:0;">Echo Music Audio Engine &bull; 100% Ad-Free Audio &bull; Direct MP3 Downloads &bull; All in One Page</p>
     </div>
 
     <!-- SEARCH VIEW: JUST SEARCH BAR AT TOP -->
     <div id="searchView">
         <div class="search-container">
             <input type="text" id="searchInput" class="search-input"
-                   placeholder="Search any song, artist, album, or playlist..."
+                   placeholder="Search any song, artist, album, or playlist on Echo Music..."
                    value=""
                    autocomplete="off"
                    onkeypress="if(event.key==='Enter') performSearch()">
@@ -1256,8 +1254,8 @@
         <div class="dl-step-item done" id="step1Item">
             <div class="dl-step-icon" id="step1Icon">✓</div>
             <div style="flex:1;">
-                <div class="dl-step-text-title">1. Check Download Availability</div>
-                <div class="dl-step-text-sub" id="step1Sub">Status: Valid audio stream detected</div>
+                <div class="dl-step-text-title">1. Check Echo Music Availability</div>
+                <div class="dl-step-text-sub" id="step1Sub">Status: Echo Music stream verified</div>
             </div>
         </div>
 
@@ -1271,7 +1269,7 @@
                 <div class="dl-progress-bar-wrap">
                     <div class="dl-progress-bar-fill" id="dlProgressFill"></div>
                 </div>
-                <div class="dl-step-text-sub" id="step2Sub">Buffering high-fidelity audio stream...</div>
+                <div class="dl-step-text-sub" id="step2Sub">Buffering Echo Music 192kbps audio stream...</div>
             </div>
         </div>
 
@@ -1569,7 +1567,7 @@
         <img class="player-thumb" id="playerThumb" src="" alt="">
         <div class="player-info">
             <div class="player-title" id="playerTitle">No song playing</div>
-            <div class="player-artist" id="playerArtist">Ad-Free Audio Engine</div>
+            <div class="player-artist" id="playerArtist">Echo Music Engine</div>
         </div>
         <div class="player-time">
             <span id="currentTime">0:00</span>
@@ -1587,7 +1585,7 @@
 
 <script>
     // Global Mobile & Desktop Backend Configuration
-    const LIVE_TUNNEL_URL = 'https://isle-clicks-dealers-yeah.trycloudflare.com';
+    const LIVE_TUNNEL_URL = 'https://decision-inspired-floral-formerly.trycloudflare.com';
 
     function getBackendBase() {
         if (window.location.hostname.includes('trycloudflare.com')) {
@@ -1600,8 +1598,6 @@
     }
 
     const nativeAudio = document.getElementById('nativeAudio');
-    let ytPlayer = null;
-    let isYtFallback = false;
     let currentQueue = [];
     let currentIndex = -1;
     let isPlaying = false;
@@ -1620,92 +1616,7 @@
         localStorage.setItem('my_music_playlists', JSON.stringify(myPlaylists));
     }
 
-    // YouTube iframe initialization for fallback
-    window.onYouTubeIframeAPIReady = function() {
-        ytPlayer = new YT.Player('yt-player', {
-            host: 'https://www.youtube-nocookie.com',
-            height: '100',
-            width: '100',
-            playerVars: {
-                'playsinline': 1,
-                'controls': 0,
-                'disablekb': 1,
-                'rel': 0,
-                'modestbranding': 1,
-                'iv_load_policy': 3,
-                'origin': window.location.origin
-            },
-            events: {
-                'onStateChange': onYtStateChange
-            }
-        });
-    };
-
-    // Active 80ms Ad-Shield: Polls every 80ms, mutes, skips to end of ad at 16x speed
-    let adShieldTimer = null;
-    let isAdMuted = false;
-
-    function startAdShield() {
-        stopAdShield();
-        adShieldTimer = setInterval(() => {
-            if (!isYtFallback || !ytPlayer || !ytPlayer.getPlayerState) return;
-            try {
-                const isAdState = (ytPlayer.getAdState && ytPlayer.getAdState() > 0);
-                const currentDur = ytPlayer.getDuration ? ytPlayer.getDuration() : 0;
-                const expectedDur = currentQueue[currentIndex] ? currentQueue[currentIndex].duration : 0;
-                const currentSec = ytPlayer.getCurrentTime ? ytPlayer.getCurrentTime() : 0;
-
-                const isShortAdDuration = (expectedDur > 60 && currentDur > 0 && currentDur <= 35);
-
-                if (isAdState || isShortAdDuration) {
-                    if (!isAdMuted) {
-                        ytPlayer.mute();
-                        isAdMuted = true;
-                        showToast('🛡️ Ad Blocked & Skipped Instantly');
-                    }
-                    ytPlayer.setPlaybackRate(16);
-                    ytPlayer.seekTo(currentDur + 1, true);
-                } else {
-                    if (isAdMuted) {
-                        ytPlayer.unMute();
-                        ytPlayer.setPlaybackRate(1);
-                        isAdMuted = false;
-                    }
-                    if (currentDur > 0) {
-                        const percent = (currentSec / currentDur) * 100;
-                        document.getElementById('progressFill').style.width = percent + '%';
-                        document.getElementById('currentTime').textContent = formatDuration(currentSec);
-                        document.getElementById('totalTime').textContent = formatDuration(currentDur);
-                    }
-                }
-            } catch (err) {}
-        }, 80);
-    }
-
-    function stopAdShield() {
-        if (adShieldTimer) {
-            clearInterval(adShieldTimer);
-            adShieldTimer = null;
-        }
-    }
-
-    function onYtStateChange(event) {
-        if (!isYtFallback) return;
-        if (event.data === YT.PlayerState.PLAYING) {
-            isPlaying = true;
-            document.getElementById('playPauseBtn').innerHTML = '&#9646;&#9646;';
-            startAdShield();
-        } else if (event.data === YT.PlayerState.PAUSED) {
-            isPlaying = false;
-            document.getElementById('playPauseBtn').innerHTML = '&#9654;';
-            stopAdShield();
-        } else if (event.data === YT.PlayerState.ENDED) {
-            stopAdShield();
-            if (isRepeat) playSong(currentIndex);
-            else if (isShuffle) playSong(Math.floor(Math.random() * currentQueue.length));
-            else if (currentIndex < currentQueue.length - 1) nextSong();
-        }
-    }
+    // Dedicated Echo Music Audio Engine Initialization
 
     function registerSong(song) {
         if (song && song.videoId) {
@@ -1777,12 +1688,12 @@
         renderQueueItems(filtered);
     }
 
-    // ==================== SEARCH & DISPLAY ====================
+    // ==================== SEARCH & DISPLAY (ECHO MUSIC ENGINE) ====================
     async function performSearch(customQuery, overrideTitle) {
         const query = (customQuery || document.getElementById('searchInput').value).trim();
         if (!query) return;
 
-        switchToPlaylistView(overrideTitle || query, 'Loading songs...');
+        switchToPlaylistView(overrideTitle || query, 'Loading songs from Echo Music...');
 
         const btn = document.getElementById('searchBtn');
         const queueList = document.getElementById('queueList');
@@ -1792,14 +1703,13 @@
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner"></span>';
         if (!overrideTitle) queueTitle.textContent = `${query}`;
-        queueMeta.textContent = `Searching line-by-line playlist songs...`;
-        queueList.innerHTML = '<div class="empty-state"><span class="spinner"></span><p style="margin-top:10px">Extracting line-by-line songs...</p></div>';
+        queueMeta.textContent = `Searching line-by-line songs on Echo Music...`;
+        queueList.innerHTML = '<div class="empty-state"><span class="spinner"></span><p style="margin-top:10px">Loading songs from Echo Music engine...</p></div>';
 
         const backendBase = (typeof getBackendBase === 'function') ? getBackendBase() : '';
         let songs = [];
         let extractedPlaylistTitle = '';
 
-        // 1. Query Python backend (yt-dlp) for songs or full extracted playlist
         try {
             const res = await fetch(`${backendBase}/api/search`, {
                 method: 'POST',
@@ -1813,10 +1723,10 @@
                 }
                 songs = res.results.map(s => {
                     const vid = s.videoId || s.id || (s.url ? (s.url.includes('v=') ? s.url.split('v=')[1].split('&')[0] : s.url) : '');
-                    const thumb = s.thumbnail || `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`;
+                    const thumb = s.thumbnail || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&h=60&fit=crop';
                     return registerSong({
                         title: s.title || 'Unknown Title',
-                        artist: s.channel || 'Unknown Artist',
+                        artist: s.channel || 'Echo Music',
                         artwork: thumb,
                         videoId: vid,
                         duration: s.duration || 240
@@ -1824,57 +1734,11 @@
                 });
             }
         } catch (e) {
-            console.warn("Backend search failed, trying public search:", e);
-        }
-
-        // 2. Public Invidious fallback (supports playlist search if "playlist" in query)
-        if (songs.length === 0) {
-            const isPlaylistSearch = query.toLowerCase().includes('playlist');
-            const publicInstances = [
-                'https://inv.nadeko.net',
-                'https://invidious.nerdvpn.de',
-                'https://invidious.f5.si'
-            ];
-            for (const inst of publicInstances) {
-                try {
-                    if (isPlaylistSearch) {
-                        const plSearchRes = await fetch(`${inst}/api/v1/search?q=${encodeURIComponent(query)}&type=playlist`).then(r => r.json());
-                        if (Array.isArray(plSearchRes) && plSearchRes.length > 0) {
-                            const topPl = plSearchRes[0];
-                            extractedPlaylistTitle = topPl.title || query;
-                            const plDetail = await fetch(`${inst}/api/v1/playlists/${topPl.playlistId}`).then(r => r.json());
-                            if (plDetail && Array.isArray(plDetail.videos) && plDetail.videos.length > 0) {
-                                songs = plDetail.videos.map(v => registerSong({
-                                    title: v.title || 'Unknown Title',
-                                    artist: v.author || 'Unknown Artist',
-                                    artwork: (v.videoThumbnails && v.videoThumbnails[0]) ? v.videoThumbnails[0].url : `https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`,
-                                    videoId: v.videoId,
-                                    duration: v.lengthSeconds || 240
-                                }));
-                                break;
-                            }
-                        }
-                    }
-                    const invRes = await fetch(`${inst}/api/v1/search?q=${encodeURIComponent(query)}&type=video`).then(r => r.json());
-                    if (Array.isArray(invRes) && invRes.length > 0) {
-                        songs = invRes.map(s => {
-                            const thumb = (s.videoThumbnails && s.videoThumbnails[0]) ? s.videoThumbnails[0].url : `https://i.ytimg.com/vi/${s.videoId}/hqdefault.jpg`;
-                            return registerSong({
-                                title: s.title || 'Unknown Title',
-                                artist: s.author || 'Unknown Artist',
-                                artwork: thumb,
-                                videoId: s.videoId,
-                                duration: s.lengthSeconds || 240
-                            });
-                        });
-                        break;
-                    }
-                } catch(err) {}
-            }
+            console.warn("Echo Music backend search failed:", e);
         }
 
         if (songs.length === 0) {
-            queueList.innerHTML = '<div class="empty-state"><p>No songs found for this search. Please try another query.</p></div>';
+            queueList.innerHTML = '<div class="empty-state"><p>No songs found in Echo Music. Please try another search term.</p></div>';
             queueMeta.textContent = '0 songs found';
             btn.disabled = false;
             btn.textContent = '🔍 Search';
@@ -1883,9 +1747,9 @@
 
         const displayTitle = overrideTitle || extractedPlaylistTitle || query;
         queueTitle.textContent = displayTitle;
-        activePlaylistInfo = { title: displayTitle, author: 'Playlist Songs', total: songs.length };
+        activePlaylistInfo = { title: displayTitle, author: 'Echo Music', total: songs.length };
         currentQueue = songs;
-        queueMeta.textContent = `${currentQueue.length} songs found • 100% Ad-Free • In-Page Downloads`;
+        queueMeta.textContent = `${currentQueue.length} songs found • Echo Music Audio Engine • In-Page Downloads`;
         const withinCont = document.getElementById('withinSearchContainer');
         if (withinCont) withinCont.style.display = 'block';
         renderQueueItems(currentQueue);
@@ -1895,28 +1759,53 @@
     }
 
     // ========================================================
-    // OPEN PLAYLIST IN LINE-BY-LINE NUMBERED VIEW
+    // OPEN PLAYLIST IN LINE-BY-LINE NUMBERED VIEW (ECHO MUSIC)
     // ========================================================
     async function openPlaylistQueue(playlistId, title, author) {
         const queueTitle = document.getElementById('queueTitle');
         const queueMeta = document.getElementById('queueMeta');
         const queueList = document.getElementById('queueList');
 
-        switchToPlaylistView(title, `${author} - Loading full playlist...`);
+        switchToPlaylistView(title, `${author || 'Echo Music'} - Loading from Echo Music...`);
         queueTitle.textContent = title;
-        queueMeta.textContent = `${author} - Loading full playlist...`;
+        queueMeta.textContent = `${author || 'Echo Music'} - Loading from Echo Music...`;
         queueList.innerHTML = '<div class="empty-state"><span class="spinner"></span><p style="margin-top:10px">Loading line-by-line playlist...</p></div>';
 
         window.scrollTo({ top: 120, behavior: 'smooth' });
 
         try {
-            const res = await fetch(`https://invidious.f5.si/api/v1/playlists/${playlistId}`).then(r => r.json());
-            const videos = res.videos || [];
+            const backendBase = (typeof getBackendBase === 'function') ? getBackendBase() : '';
+            const res = await fetch(`${backendBase}/api/search`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: playlistId })
+            }).then(r => r.json());
+
+            const videos = (res && Array.isArray(res.results)) ? res.results : [];
 
             if (videos.length === 0) {
-                queueList.innerHTML = '<div class="empty-state"><p>No songs found in this playlist.</p></div>';
+                queueList.innerHTML = '<div class="empty-state"><p>No songs found in this Echo Music playlist.</p></div>';
                 return;
             }
+
+            activePlaylistInfo = { title, author: author || 'Echo Music', total: videos.length };
+
+            currentQueue = videos.map(v => registerSong({
+                title: v.title || 'Unknown Title',
+                artist: v.channel || author || 'Echo Music',
+                artwork: v.thumbnail || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&h=60&fit=crop',
+                videoId: v.videoId || v.id,
+                duration: v.duration || 240
+            }));
+
+            queueMeta.textContent = `${author || 'Echo Music'} - 1 / ${currentQueue.length}`;
+            renderQueueItems(currentQueue);
+            playSong(0);
+
+        } catch (e) {
+            queueList.innerHTML = `<div class="empty-state">&#10060; Failed to load Echo Music playlist: ${e.message}</div>`;
+        }
+    }
 
             activePlaylistInfo = { title, author, total: videos.length };
 
@@ -2166,17 +2055,6 @@
                 }
             }
 
-            if (!audioUrl) {
-                const res = await fetch(`https://invidious.f5.si/api/v1/videos/${song.videoId}`).then(r => r.json());
-                const stream = (res.adaptiveFormats || []).find(f => (f.type || '').includes('audio/mp4'))
-                            || (res.adaptiveFormats || []).find(f => (f.type || '').includes('audio'));
-
-                if (stream && stream.url) {
-                    audioUrl = stream.url;
-                    streamCache[song.videoId] = audioUrl;
-                }
-            }
-
             if (audioUrl) {
                 nativeAudio.src = audioUrl;
                 await nativeAudio.play();
@@ -2186,23 +2064,15 @@
                 // Complete MediaSession Lock-Screen Controls
                 updateMediaSession(song);
             } else {
-                throw new Error("No direct stream");
+                throw new Error("No direct stream available from Echo Music engine");
             }
         } catch (e) {
-            console.warn("Direct stream failed, falling back to backup player:", e);
-            isYtFallback = true;
-            if (ytPlayer && ytPlayer.loadVideoById) {
-                ytPlayer.loadVideoById(song.videoId);
-                ytPlayer.playVideo();
-                startAdShield();
-                isPlaying = true;
-                document.getElementById('playPauseBtn').innerHTML = '&#9646;&#9646;';
-            }
+            console.warn("Echo Music direct stream error:", e);
+            showToast(`⚠️ Unable to play "${song.title}". Please try again.`);
         }
     }
 
     nativeAudio.addEventListener('timeupdate', () => {
-        if (isYtFallback) return;
         const current = nativeAudio.currentTime || 0;
         const duration = nativeAudio.duration || (currentQueue[currentIndex] ? currentQueue[currentIndex].duration : 0);
         if (duration > 0) {
@@ -2241,23 +2111,6 @@
     });
 
     function togglePlayPause() {
-        if (isYtFallback && ytPlayer) {
-            if (isPlaying) {
-                ytPlayer.pauseVideo();
-                isPlaying = false;
-                stopAdShield();
-                document.getElementById('playPauseBtn').innerHTML = '&#9654;';
-                if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
-            } else {
-                ytPlayer.playVideo();
-                isPlaying = true;
-                startAdShield();
-                document.getElementById('playPauseBtn').innerHTML = '&#9646;&#9646;';
-                if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
-            }
-            return;
-        }
-
         if (!nativeAudio.src) return;
         if (isPlaying) {
             nativeAudio.pause();
@@ -2285,9 +2138,7 @@
         const bar = document.getElementById('progressBar');
         const rect = bar.getBoundingClientRect();
         const percent = (e.clientX - rect.left) / rect.width;
-        if (isYtFallback && ytPlayer && ytPlayer.getDuration) {
-            ytPlayer.seekTo(percent * ytPlayer.getDuration(), true);
-        } else if (nativeAudio.duration) {
+        if (nativeAudio.duration) {
             nativeAudio.currentTime = percent * nativeAudio.duration;
         }
     }

@@ -105,11 +105,10 @@ def cleanup_old_downloads(max_age_hours=2, max_total_mb=400):
         print(f"[CLEANUP ERROR] {e}", flush=True)
 
 
-def validate_youtube_target(target):
+def validate_echo_audio_target(target):
     """
-    Strict URL & Video ID Validator.
-    Blocks SSRF (Server-Side Request Forgery), command injection, localhost loops,
-    AWS metadata endpoints, and non-YouTube domains.
+    Strict URL & Video ID Validator for Echo Music Audio Engine.
+    Blocks SSRF, command injection, localhost loops, and unauthorized network requests.
     """
     if not target or not isinstance(target, str):
         return None
@@ -117,7 +116,7 @@ def validate_youtube_target(target):
     if len(target) > 300:
         return None
 
-    # 1. Direct 10 to 20-character Video ID
+    # 1. Direct 10 to 20-character Audio ID
     if re.match(r'^[a-zA-Z0-9_-]{10,20}$', target):
         return f"https://www.youtube.com/watch?v={target}"
 
@@ -125,7 +124,7 @@ def validate_youtube_target(target):
     if re.match(r'^(PL|OLAK5uy_)[a-zA-Z0-9_-]{10,80}$', target):
         return f"https://www.youtube.com/playlist?list={target}"
 
-    # 3. Full YouTube URLs
+    # 3. Validated audio targets
     try:
         parsed = urllib.parse.urlparse(target)
         if parsed.scheme not in ("http", "https"):
@@ -362,15 +361,15 @@ def add_security_and_cors_headers(response):
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
 
-    # Content-Security-Policy: Allow trusted resources
+    # Content-Security-Policy: Allow trusted resources for Echo Music
     csp = (
         "default-src 'self' https: data: blob:; "
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://s.ytimg.com; "
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
         "font-src 'self' https://fonts.gstatic.com data:; "
         "img-src 'self' https: data: blob:; "
         "media-src 'self' https: data: blob:; "
-        "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com; "
+        "frame-src 'self'; "
         "connect-src 'self' https:;"
     )
     response.headers["Content-Security-Policy"] = csp
@@ -461,14 +460,14 @@ def search_songs():
 
 @app.route("/api/stream", methods=["POST", "OPTIONS"])
 def stream_song():
-    """Extract direct audio stream URL with SSRF protection."""
+    """Extract direct audio stream URL with SSRF protection for Echo Music."""
     if request.method == "OPTIONS":
         return "", 204
     data = request.get_json(silent=True) or {}
     raw_url = data.get("url", "")
-    safe_url = validate_youtube_target(raw_url)
+    safe_url = validate_echo_audio_target(raw_url)
     if not safe_url:
-        return jsonify({"error": "Invalid audio URL. Only legitimate YouTube links are permitted."}), 400
+        return jsonify({"error": "Invalid audio request. Song not found in Echo Music engine."}), 400
 
     print(f"[STREAM] '{raw_url}' -> '{safe_url}'", flush=True)
 
@@ -487,7 +486,7 @@ def stream_song():
             if info.get("thumbnails"):
                 thumbnail = info["thumbnails"][-1].get("url", "")
             duration = info.get("duration", 0)
-            channel = info.get("channel") or info.get("uploader", "Unknown")
+            channel = info.get("channel") or info.get("uploader", "Echo Music")
 
         return jsonify({
             "stream_url": audio_url,
@@ -503,7 +502,7 @@ def stream_song():
 
 @app.route("/api/download", methods=["POST", "OPTIONS"])
 def start_download():
-    """Start downloading a song with concurrency & security safeguards."""
+    """Start downloading a song with concurrency & security safeguards in Echo Music."""
     if request.method == "OPTIONS":
         return "", 204
     # Check concurrent downloads limit
@@ -513,9 +512,9 @@ def start_download():
 
     data = request.get_json(silent=True) or {}
     raw_url = data.get("url", "")
-    safe_url = validate_youtube_target(raw_url)
+    safe_url = validate_echo_audio_target(raw_url)
     if not safe_url:
-        return jsonify({"error": "Invalid URL. Only legitimate YouTube audio links are permitted."}), 400
+        return jsonify({"error": "Invalid audio request. Song not found in Echo Music engine."}), 400
 
     task_id = str(uuid.uuid4())[:8]
     print(f"[DOWNLOAD REQUEST] '{raw_url}' -> '{safe_url}' (task_id: {task_id})", flush=True)
@@ -650,8 +649,8 @@ def serve_root_file(filename):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     print(f"\n==============================================")
-    print(f" Music Web App is running with Security Enabled!")
-    print(f" OWASP Headers: ACTIVE | Rate Limiting: ACTIVE")
+    print(f" Echo Music Server is running with Security Enabled!")
+    print(f" Echo Audio Engine: ACTIVE | Direct MP3: ACTIVE")
     print(f" Open http://localhost:{port} in your browser")
     print(f"==============================================\n")
     # Production security: debug=False prevents Werkzeug remote interactive console execution
