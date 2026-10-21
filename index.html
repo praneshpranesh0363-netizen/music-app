@@ -457,6 +457,171 @@
             transform: translateY(-1px);
             box-shadow: 0 6px 16px rgba(142, 45, 226, 0.6);
         }
+        .btn-row-download.downloading {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border-color: #f59e0b;
+            cursor: wait;
+        }
+        .btn-row-download.done {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-color: #10b981;
+        }
+        .btn-row-download.error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border-color: #ef4444;
+        }
+
+        /* Featured Album Cards View */
+        .albums-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+        .album-card {
+            background: rgba(22, 18, 48, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+        .album-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(248, 87, 166, 0.5);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(248, 87, 166, 0.2);
+        }
+        .album-cover-wrap {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 12px;
+            background: #171333;
+        }
+        .album-cover-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .album-card:hover .album-cover-img {
+            transform: scale(1.06);
+        }
+        .album-tag-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(13, 11, 33, 0.85);
+            border: 1px solid rgba(56, 239, 125, 0.4);
+            color: #38ef7d;
+            font-size: 0.72em;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 12px;
+            backdrop-filter: blur(8px);
+        }
+        .album-title {
+            font-weight: 700;
+            font-size: 0.96em;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 4px;
+        }
+        .album-artist {
+            font-size: 0.8em;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 10px;
+        }
+        .album-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: auto;
+        }
+        .album-tracks-count {
+            font-size: 0.75em;
+            color: #a4adc7;
+        }
+        .btn-album-play {
+            background: linear-gradient(135deg, #f857a6, #ff5858);
+            border: none;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.78em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .btn-album-play:hover {
+            transform: scale(1.06);
+        }
+
+        /* Owned & Royalty-Free Library Styling */
+        .library-upload-box {
+            background: rgba(22, 18, 48, 0.85);
+            border: 1px dashed rgba(56, 239, 125, 0.4);
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .library-upload-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .library-input {
+            flex: 1;
+            min-width: 140px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+            color: #fff;
+            padding: 10px 14px;
+            font-size: 0.88em;
+        }
+        .library-input:focus {
+            border-color: #38ef7d;
+            outline: none;
+        }
+        .license-pill {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7em;
+            font-weight: 700;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+        .license-pill.royalty-free {
+            background: rgba(56, 239, 125, 0.15);
+            color: #38ef7d;
+            border: 1px solid rgba(56, 239, 125, 0.4);
+        }
+        .license-pill.owned {
+            background: rgba(0, 210, 255, 0.15);
+            color: #00d2ff;
+            border: 1px solid rgba(0, 210, 255, 0.4);
+        }
+        .license-pill.public-domain {
+            background: rgba(255, 184, 0, 0.15);
+            color: #ffb800;
+            border: 1px solid rgba(255, 184, 0, 0.4);
+        }
 
         /* ======================================================== */
         /* PANEL 1: PLAYLIST SELECTION PAGE STYLING                 */
@@ -822,6 +987,54 @@
         }
         .ctrl-play:hover { transform: scale(1.08); }
 
+        /* Volume Control */
+        .player-volume-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0 4px;
+        }
+        .vol-btn {
+            font-size: 1.1em;
+            padding: 2px 4px;
+            cursor: pointer;
+        }
+        .vol-slider {
+            width: 75px;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+            vertical-align: middle;
+            transition: background 0.2s;
+        }
+        .vol-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #38ef7d;
+            cursor: pointer;
+            box-shadow: 0 0 6px rgba(56, 239, 125, 0.8);
+        }
+        .vol-slider::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #38ef7d;
+            cursor: pointer;
+            border: none;
+        }
+        @media (max-width: 600px) {
+            .vol-slider {
+                width: 45px;
+            }
+        }
+
         /* Notification Toast */
         .toast-box {
             position: fixed;
@@ -1172,6 +1385,14 @@
         <p style="font-size:0.86em; color:var(--text-muted); margin:0;">Echo Music Audio Engine &bull; 100% Ad-Free Audio &bull; Direct MP3 Downloads &bull; All in One Page</p>
     </div>
 
+    <!-- MAIN NAVIGATION TABS -->
+    <div class="nav-tabs">
+        <button class="nav-btn active" id="tabSearchBtn" onclick="switchMainTab('search')">🔍 Search Songs</button>
+        <button class="nav-btn" id="tabAlbumsBtn" onclick="switchMainTab('albums')">💽 Album Cards</button>
+        <button class="nav-btn" id="tabLibraryBtn" onclick="switchMainTab('library')">📁 Owned &amp; Royalty-Free</button>
+        <button class="nav-btn" id="tabMyPlaylistsBtn" onclick="switchMainTab('myplaylists')">❤️ My Playlists</button>
+    </div>
+
     <!-- SEARCH VIEW: JUST SEARCH BAR AT TOP -->
     <div id="searchView">
         <div class="search-container">
@@ -1228,6 +1449,51 @@
             <button class="btn-play-all" onclick="createNewPlaylistPrompt()">+ New Playlist</button>
         </div>
         <div class="playlists-grid" id="myPlaylistsGrid"></div>
+    </div>
+
+    <!-- ALBUM CARDS VIEW -->
+    <div id="albumsView" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <div>
+                <h2 style="font-size:1.25em; font-weight:800; margin:0 0 4px 0;">💽 Featured Albums &amp; Collections</h2>
+                <p style="font-size:0.84em; color:var(--text-muted); margin:0;">Explore curated dark-theme albums. Tap any album to browse its songs line-by-line.</p>
+            </div>
+        </div>
+        <div class="albums-grid" id="albumsGrid">
+            <div class="empty-state"><span class="spinner"></span><p style="margin-top:10px">Loading albums...</p></div>
+        </div>
+    </div>
+
+    <!-- OWNED & ROYALTY-FREE LIBRARY VIEW -->
+    <div id="libraryView" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+            <div>
+                <h2 style="font-size:1.25em; font-weight:800; margin:0 0 4px 0;">📁 Owned &amp; Royalty-Free Music</h2>
+                <p style="font-size:0.84em; color:var(--text-muted); margin:0;">Upload your own tracks or stream royalty-free and public domain audio with direct MP3 downloads.</p>
+            </div>
+            <button class="btn-play-all" onclick="toggleUploadBox()">➕ Upload Your Song</button>
+        </div>
+
+        <!-- User Song Upload Box -->
+        <div id="uploadBox" class="library-upload-box" style="display:none;">
+            <div style="font-weight:700; font-size:0.95em; color:#38ef7d;">⬆ Upload Owned Music Track (MP3, WAV, M4A, FLAC)</div>
+            <form id="uploadSongForm" onsubmit="handleSongUpload(event)" style="display:flex; flex-direction:column; gap:10px;">
+                <div class="library-upload-row">
+                    <input type="text" id="uploadTitle" class="library-input" placeholder="Song Title (e.g. My Acoustic Melody)" required>
+                    <input type="text" id="uploadArtist" class="library-input" placeholder="Artist Name (e.g. Self / Owned Track)">
+                    <input type="text" id="uploadAlbum" class="library-input" placeholder="Album Name (e.g. My Album)">
+                </div>
+                <div class="library-upload-row" style="align-items:center;">
+                    <input type="file" id="uploadAudioFile" accept=".mp3,.wav,.m4a,.ogg,.flac,audio/*" required style="color:#d1b5ff; font-size:0.85em;">
+                    <button type="submit" id="uploadSubmitBtn" class="search-submit" style="padding:10px 22px; font-size:0.88em; margin-left:auto;">Upload to Library</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Library Tracks Grid/List -->
+        <div class="queue-list" id="libraryTracksList">
+            <div class="empty-state"><span class="spinner"></span><p style="margin-top:10px">Loading owned &amp; royalty-free tracks...</p></div>
+        </div>
     </div>
 </div>
 
@@ -1578,6 +1844,10 @@
             <button class="ctrl-btn" onclick="prevSong()" title="Previous">&#9198;</button>
             <button class="ctrl-play" id="playPauseBtn" onclick="togglePlayPause()">&#9654;</button>
             <button class="ctrl-btn" onclick="nextSong()" title="Next">&#9197;</button>
+            <div class="player-volume-wrap">
+                <button class="ctrl-btn vol-btn" id="volBtn" onclick="toggleMute()" title="Mute/Unmute">🔊</button>
+                <input type="range" id="volSlider" class="vol-slider" min="0" max="1" step="0.01" value="1" oninput="setAudioVolume(this.value)" title="Volume">
+            </div>
             <button class="ctrl-btn" onclick="downloadCurrentSong()" title="Download Playing MP3" style="background:linear-gradient(135deg, #8e2de2, #4a00e0); color:#fff; border-radius:18px; padding:6px 14px; font-size:0.82em; font-weight:800; display:flex; align-items:center; gap:5px; cursor:pointer; box-shadow:0 3px 10px rgba(142,45,226,0.4);">&#11015; Download</button>
         </div>
     </div>
@@ -1635,15 +1905,282 @@
         }, 3500);
     }
 
-    // ==================== TABS ====================
+    // ==================== TABS & NAVIGATION ====================
     function switchMainTab(tab) {
-        document.getElementById('tabSearchBtn').classList.toggle('active', tab === 'search');
-        document.getElementById('tabMyPlaylistsBtn').classList.toggle('active', tab === 'myplaylists');
-        document.getElementById('searchView').style.display = tab === 'search' ? 'block' : 'none';
-        document.getElementById('myPlaylistsView').style.display = tab === 'myplaylists' ? 'block' : 'none';
+        const searchBtn = document.getElementById('tabSearchBtn');
+        const albumsBtn = document.getElementById('tabAlbumsBtn');
+        const libBtn = document.getElementById('tabLibraryBtn');
+        const myPlaylistsBtn = document.getElementById('tabMyPlaylistsBtn');
 
-        if (tab === 'myplaylists') {
+        if (searchBtn) searchBtn.classList.toggle('active', tab === 'search');
+        if (albumsBtn) albumsBtn.classList.toggle('active', tab === 'albums');
+        if (libBtn) libBtn.classList.toggle('active', tab === 'library');
+        if (myPlaylistsBtn) myPlaylistsBtn.classList.toggle('active', tab === 'myplaylists');
+
+        const searchView = document.getElementById('searchView');
+        const albumsView = document.getElementById('albumsView');
+        const libView = document.getElementById('libraryView');
+        const myPlaylistsView = document.getElementById('myPlaylistsView');
+
+        if (searchView) searchView.style.display = tab === 'search' ? 'block' : 'none';
+        if (albumsView) albumsView.style.display = tab === 'albums' ? 'block' : 'none';
+        if (libView) libView.style.display = tab === 'library' ? 'block' : 'none';
+        if (myPlaylistsView) myPlaylistsView.style.display = tab === 'myplaylists' ? 'block' : 'none';
+
+        if (tab === 'albums') {
+            loadAlbums();
+        } else if (tab === 'library') {
+            loadLibraryTracks();
+        } else if (tab === 'myplaylists') {
             renderMyPlaylists();
+        }
+    }
+
+    // ==================== VOLUME CONTROL ====================
+    let lastVolume = 1.0;
+    let isMuted = false;
+
+    function initVolumeControl() {
+        try {
+            const saved = localStorage.getItem('echo_music_vol');
+            if (saved !== null) {
+                const v = parseFloat(saved);
+                if (!isNaN(v) && v >= 0 && v <= 1) {
+                    setAudioVolume(v);
+                    const slider = document.getElementById('volSlider');
+                    if (slider) slider.value = v;
+                    return;
+                }
+            }
+        } catch(e) {}
+        setAudioVolume(1.0);
+    }
+
+    function setAudioVolume(val) {
+        const v = Math.max(0, Math.min(1, parseFloat(val)));
+        if (nativeAudio) nativeAudio.volume = v;
+        const volBtn = document.getElementById('volBtn');
+        if (!volBtn) return;
+        if (v === 0) {
+            volBtn.innerHTML = '🔇';
+            isMuted = true;
+        } else if (v < 0.4) {
+            volBtn.innerHTML = '🔉';
+            isMuted = false;
+            lastVolume = v;
+        } else {
+            volBtn.innerHTML = '🔊';
+            isMuted = false;
+            lastVolume = v;
+        }
+        try { localStorage.setItem('echo_music_vol', v); } catch(e) {}
+    }
+
+    function toggleMute() {
+        const slider = document.getElementById('volSlider');
+        if (isMuted || (nativeAudio && nativeAudio.volume === 0)) {
+            const restoreVol = (lastVolume > 0) ? lastVolume : 0.8;
+            if (nativeAudio) nativeAudio.volume = restoreVol;
+            if (slider) slider.value = restoreVol;
+            setAudioVolume(restoreVol);
+            showToast(`🔊 Volume: ${Math.round(restoreVol * 100)}%`);
+        } else {
+            lastVolume = nativeAudio ? nativeAudio.volume : 1.0;
+            if (nativeAudio) nativeAudio.volume = 0;
+            if (slider) slider.value = 0;
+            setAudioVolume(0);
+            showToast('🔇 Muted');
+        }
+    }
+
+    // ==================== ALBUM CARDS ====================
+    async function loadAlbums() {
+        const grid = document.getElementById('albumsGrid');
+        if (!grid) return;
+        grid.innerHTML = '<div class="empty-state"><span class="spinner"></span><p style="margin-top:10px">Loading album collections...</p></div>';
+        const backendBase = (typeof getBackendBase === 'function') ? getBackendBase() : '';
+        try {
+            const res = await fetch(`${backendBase}/api/albums`).then(r => r.json());
+            if (res && Array.isArray(res.albums) && res.albums.length > 0) {
+                grid.innerHTML = res.albums.map(alb => `
+                    <div class="album-card" onclick="openAlbumCard('${escapeHtml(alb.query)}', '${escapeHtml(alb.title)}')">
+                        <div class="album-cover-wrap">
+                            <img class="album-cover-img" src="${alb.cover}" alt="${escapeHtml(alb.title)}" onerror="this.src='https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&h=300&fit=crop'">
+                            <div class="album-tag-badge">${alb.tracks_count} Songs</div>
+                        </div>
+                        <div class="album-title" title="${escapeHtml(alb.title)}">${escapeHtml(alb.title)}</div>
+                        <div class="album-artist" title="${escapeHtml(alb.artist)}">${escapeHtml(alb.artist)}</div>
+                        <div class="album-footer">
+                            <span class="album-tracks-count">${escapeHtml(alb.genre)}</span>
+                            <button class="btn-album-play" onclick="event.stopPropagation(); openAlbumCard('${escapeHtml(alb.query)}', '${escapeHtml(alb.title)}')">▶ Play</button>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                grid.innerHTML = '<div class="empty-state"><p>No featured albums available.</p></div>';
+            }
+        } catch (e) {
+            console.warn("Failed to load albums:", e);
+            grid.innerHTML = '<div class="empty-state"><p>Unable to load albums. Please check connection.</p></div>';
+        }
+    }
+
+    function openAlbumCard(query, title) {
+        switchMainTab('search');
+        performSearch(query, title);
+    }
+
+    // ==================== OWNED & ROYALTY-FREE LIBRARY ====================
+    let ownedLibraryTracks = [];
+
+    async function loadLibraryTracks() {
+        const listEl = document.getElementById('libraryTracksList');
+        if (!listEl) return;
+        listEl.innerHTML = '<div class="empty-state"><span class="spinner"></span><p style="margin-top:10px">Loading owned & royalty-free music...</p></div>';
+        const backendBase = (typeof getBackendBase === 'function') ? getBackendBase() : '';
+        try {
+            const res = await fetch(`${backendBase}/api/library`).then(r => r.json());
+            if (res && Array.isArray(res.tracks) && res.tracks.length > 0) {
+                ownedLibraryTracks = res.tracks.map(t => registerSong({
+                    title: t.title,
+                    artist: t.artist,
+                    album: t.album,
+                    artwork: t.thumbnail || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&h=60&fit=crop',
+                    videoId: t.id,
+                    duration: t.duration || 180,
+                    url: t.url,
+                    download_url: t.download_url,
+                    source: t.source || 'owned',
+                    license: t.license || 'Permitted'
+                }));
+
+                listEl.innerHTML = ownedLibraryTracks.map((song, i) => {
+                    const licenseClass = (song.source === 'owned') ? 'owned' : ((song.license && song.license.includes('Public')) ? 'public-domain' : 'royalty-free');
+                    const licenseLabel = song.license || (song.source === 'owned' ? 'Owned Track' : 'Royalty-Free');
+                    return `
+                    <div class="queue-row" id="librow-${i}">
+                        <div class="queue-num">${i + 1}</div>
+                        <div class="queue-thumb-box" onclick="playLibrarySong(${i})" style="cursor:pointer;" title="Tap to Play">
+                            <img class="queue-thumb-img" src="${song.artwork}" alt="${escapeHtml(song.title)}">
+                            <span class="queue-dur-badge">${formatDuration(song.duration)}</span>
+                        </div>
+                        <div class="queue-info" onclick="playLibrarySong(${i})" style="cursor:pointer;" title="Tap to Play">
+                            <div class="queue-track-title">
+                                ${escapeHtml(song.title)}
+                                <span class="license-pill ${licenseClass}">${escapeHtml(licenseLabel)}</span>
+                            </div>
+                            <div class="queue-track-author">${escapeHtml(song.artist)} • ${escapeHtml(song.album || 'Permitted Library')}</div>
+                        </div>
+                        <div class="queue-row-actions" onclick="event.stopPropagation()">
+                            <button class="btn-row-play" onclick="event.stopPropagation(); playLibrarySong(${i})" title="Play on same page">&gt; Play</button>
+                            <button class="btn-row-download" id="lib-dl-btn-${i}" onclick="event.stopPropagation(); downloadLibrarySong(${i}, event)" title="Direct MP3 Download">&#11015; Download</button>
+                        </div>
+                    </div>
+                    `;
+                }).join('');
+            } else {
+                listEl.innerHTML = '<div class="empty-state"><p>No tracks in owned library yet. Click "+ Upload Your Song" above to add your music.</p></div>';
+            }
+        } catch (e) {
+            console.warn("Failed to load library:", e);
+            listEl.innerHTML = '<div class="empty-state"><p>Failed to connect to local library.</p></div>';
+        }
+    }
+
+    function playLibrarySong(idx) {
+        const song = ownedLibraryTracks[idx];
+        if (!song) return;
+        currentQueue = ownedLibraryTracks;
+        activePlaylistInfo = { title: "Owned & Royalty-Free Library", author: "Echo Music", total: ownedLibraryTracks.length };
+        playSong(idx);
+    }
+
+    function downloadLibrarySong(idx, evt) {
+        if (evt) {
+            evt.stopPropagation();
+            if (evt.preventDefault) evt.preventDefault();
+        }
+        const song = ownedLibraryTracks[idx];
+        if (!song) return;
+        const btn = document.getElementById(`lib-dl-btn-${idx}`);
+        if (btn) {
+            btn.classList.add('downloading');
+            btn.innerHTML = '⏳ Saving...';
+        }
+        const backendBase = (typeof getBackendBase === 'function') ? getBackendBase() : '';
+        const dlUrl = (song.download_url && song.download_url.startsWith('http') ? '' : backendBase) + (song.download_url || `/api/library/download/${song.filename}`);
+        const safeTitle = (song.title || 'song').replace(/[<>:"/\\|?*]+/g, '_');
+        const cleanName = safeTitle.toLowerCase().endsWith('.mp3') ? safeTitle : `${safeTitle}.mp3`;
+        
+        downloadOnSamePage(dlUrl, cleanName);
+        showToast(`🎉 "${song.title}" downloaded directly to device!`);
+        
+        if (btn) {
+            setTimeout(() => {
+                btn.classList.remove('downloading');
+                btn.classList.add('done');
+                btn.innerHTML = '✓ Saved';
+                setTimeout(() => {
+                    btn.classList.remove('done');
+                    btn.innerHTML = '&#11015; Download';
+                }, 3000);
+            }, 1000);
+        }
+    }
+
+    function toggleUploadBox() {
+        const box = document.getElementById('uploadBox');
+        if (!box) return;
+        box.style.display = (box.style.display === 'none' || !box.style.display) ? 'flex' : 'none';
+    }
+
+    async function handleSongUpload(e) {
+        e.preventDefault();
+        const fileInput = document.getElementById('uploadAudioFile');
+        const titleInput = document.getElementById('uploadTitle');
+        const artistInput = document.getElementById('uploadArtist');
+        const albumInput = document.getElementById('uploadAlbum');
+        const submitBtn = document.getElementById('uploadSubmitBtn');
+
+        if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+            showToast('⚠️ Please select an audio file to upload.');
+            return;
+        }
+
+        const file = fileInput.files[0];
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('title', titleInput ? titleInput.value.trim() : '');
+        formData.append('artist', artistInput ? artistInput.value.trim() : '');
+        formData.append('album', albumInput ? albumInput.value.trim() : '');
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner"></span> Uploading...';
+
+        const backendBase = (typeof getBackendBase === 'function') ? getBackendBase() : '';
+        try {
+            const res = await fetch(`${backendBase}/api/upload`, {
+                method: 'POST',
+                body: formData
+            }).then(r => r.json());
+
+            if (res && res.success) {
+                showToast(`🎉 "${res.song.title}" uploaded to your Owned Library!`);
+                fileInput.value = '';
+                if (titleInput) titleInput.value = '';
+                if (artistInput) artistInput.value = '';
+                if (albumInput) albumInput.value = '';
+                toggleUploadBox();
+                loadLibraryTracks();
+            } else {
+                showToast(`⚠️ Upload failed: ${res.error || 'Server error'}`);
+            }
+        } catch (err) {
+            console.error("Upload error:", err);
+            showToast(`⚠️ Failed to upload song. Please try again.`);
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Upload to Library';
         }
     }
 
@@ -1726,10 +2263,14 @@
                     const thumb = s.thumbnail || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&h=60&fit=crop';
                     return registerSong({
                         title: s.title || 'Unknown Title',
-                        artist: s.channel || 'Echo Music',
+                        artist: s.artist || s.channel || 'Echo Music',
                         artwork: thumb,
                         videoId: vid,
-                        duration: s.duration || 240
+                        duration: s.duration || 240,
+                        url: s.url,
+                        download_url: s.download_url,
+                        source: s.source,
+                        license: s.license
                     });
                 });
             }
@@ -2036,7 +2577,7 @@
 
         try {
             isYtFallback = false;
-            let audioUrl = streamCache[song.videoId];
+            let audioUrl = song.url || song.stream_url || streamCache[song.videoId];
 
             if (!audioUrl) {
                 const backendBase = (typeof getBackendBase === 'function') ? getBackendBase() : '';
@@ -2056,7 +2597,8 @@
             }
 
             if (audioUrl) {
-                nativeAudio.src = audioUrl;
+                const finalAudioUrl = (audioUrl.startsWith('http') || audioUrl.startsWith('blob:')) ? audioUrl : (getBackendBase() + audioUrl);
+                nativeAudio.src = finalAudioUrl;
                 await nativeAudio.play();
                 isPlaying = true;
                 document.getElementById('playPauseBtn').innerHTML = '&#9646;&#9646;';
@@ -2267,11 +2809,38 @@
         const fillEl = document.getElementById('dlProgressFill');
         if (fillEl) fillEl.style.width = '0%';
         const pctEl = document.getElementById('dlPercentLabel');
-        if (pctEl) pctEl.textContent = '0%';
+        if (pctEl) {
+            pctEl.textContent = '0%';
+            pctEl.style.color = '#38ef7d';
+        }
         const modalEl = document.getElementById('downloadModal');
         if (modalEl) modalEl.style.display = 'flex';
 
-        // Run download engine
+        // Direct download for owned / royalty-free library track
+        if (song.download_url) {
+            const backendBase = (typeof getBackendBase === 'function') ? getBackendBase() : '';
+            const safeTitle = (song.title || 'song').replace(/[<>:"/\\|?*]+/g, '_');
+            const cleanName = safeTitle.toLowerCase().endsWith('.mp3') ? safeTitle : `${safeTitle}.mp3`;
+            const fullDlUrl = (song.download_url.startsWith('http') ? '' : backendBase) + song.download_url;
+
+            setDownloadStep(2);
+            if (fillEl) fillEl.style.width = '50%';
+            if (pctEl) pctEl.textContent = '50%';
+
+            setTimeout(() => {
+                setDownloadStep(3);
+                if (fillEl) fillEl.style.width = '100%';
+                if (pctEl) pctEl.textContent = '100%';
+                setTimeout(() => {
+                    setDownloadStep(4);
+                    downloadOnSamePage(fullDlUrl, cleanName);
+                    showToast(`🎉 "${song.title}" saved to your device Downloads!`);
+                }, 400);
+            }, 300);
+            return;
+        }
+
+        // Run authorized backend download engine
         runLocalBackendDownload(videoId, song);
     }
 
@@ -2301,10 +2870,10 @@
         } else if (step === 2) {
             if (s1) s1.classList.add('done');
             if (icon1) icon1.innerHTML = '✓';
-            if (sub1) sub1.textContent = 'Status: Valid / Allowed';
+            if (sub1) sub1.textContent = 'Status: Valid / Permitted';
             if (s2) s2.classList.add('active');
             if (icon2) icon2.innerHTML = '☁';
-            if (sub2) sub2.textContent = 'Extracting and buffering 192kbps MP3 audio stream...';
+            if (sub2) sub2.textContent = 'Buffering permitted audio stream...';
         } else if (step === 3) {
             if (s1) s1.classList.add('done');
             if (s2) s2.classList.add('done');
@@ -2313,7 +2882,7 @@
             if (sub2) sub2.textContent = 'Audio stream buffered (100%)';
             if (s3) s3.classList.add('active');
             if (icon3) icon3.innerHTML = '⚡';
-            if (sub3) sub3.textContent = 'Converting to pristine 192kbps MP3 format...';
+            if (sub3) sub3.textContent = 'Writing MP3 audio format with correct metadata...';
         } else if (step === 4) {
             if (s1) s1.classList.add('done');
             if (s2) s2.classList.add('done');
@@ -2324,7 +2893,7 @@
             if (icon3) icon3.innerHTML = '✓';
             if (icon4) icon4.innerHTML = '✓';
             if (sub3) sub3.textContent = 'MP3 audio format conversion complete';
-            if (sub4) sub4.textContent = '✅ Saved! File ready in device storage (Downloads).';
+            if (sub4) sub4.textContent = '✅ Saved! File downloaded directly to device storage.';
 
             const saveBtn = document.getElementById('saveFileBtn');
             if (saveBtn) {
@@ -2346,10 +2915,8 @@
             }).then(r => r.json());
 
             if (!res.task_id) {
-                if (res && res.error) {
-                    showToast(`⚠️ ${res.error}`);
-                }
-                runClientBackgroundDownload(videoId, song);
+                const errMsg = (res && res.error) ? res.error : 'Download not authorized or stream restricted by source.';
+                handleDownloadFailure(errMsg, song);
                 return;
             }
 
@@ -2371,7 +2938,7 @@
                         }
                     }
 
-                    // Progressing through FFmpeg conversion state
+                    // Progressing through conversion state
                     if (prog.status === 'processing') {
                         setDownloadStep(3);
                         document.getElementById('dlProgressFill').style.width = '100%';
@@ -2385,7 +2952,7 @@
                         const dlUrl = `${backendBase}/api/file/${encodeURIComponent(prog.filename)}`;
                         currentDownloadedFileUrl = dlUrl;
                         const safeTitle = (song.title || 'song').replace(/[<>:"/\\|?*]+/g, '_');
-                        const downloadFileName = `${safeTitle}.mp3`;
+                        const downloadFileName = safeTitle.toLowerCase().endsWith('.mp3') ? safeTitle : `${safeTitle}.mp3`;
 
                         setDownloadStep(4);
 
@@ -2397,7 +2964,7 @@
                         clearInterval(downloadProgressTimer);
                         downloadProgressTimer = null;
                         console.warn('Backend download error:', prog.message);
-                        runClientBackgroundDownload(videoId, song);
+                        handleDownloadFailure(prog.message || 'Download error from audio source.', song);
                     }
                 } catch (err) {
                     pollFailures++;
@@ -2405,118 +2972,46 @@
                     if (pollFailures >= 6) {
                         clearInterval(downloadProgressTimer);
                         downloadProgressTimer = null;
-                        runClientBackgroundDownload(videoId, song);
+                        handleDownloadFailure('Connection to download service timed out.', song);
                     }
                 }
             }, 800);
 
         } catch (e) {
-            runClientBackgroundDownload(videoId, song);
+            handleDownloadFailure('Network error connecting to download engine.', song);
         }
     }
 
-    // In-browser audio blob generator for offline mobile fallback
-    function createFallbackAudioBlob(title) {
-        const sampleRate = 44100;
-        const duration = 2;
-        const numSamples = sampleRate * duration;
-        const buffer = new ArrayBuffer(44 + numSamples * 2);
-        const view = new DataView(buffer);
+    function handleDownloadFailure(message, song) {
+        if (downloadProgressTimer) {
+            clearInterval(downloadProgressTimer);
+            downloadProgressTimer = null;
+        }
+        const s2 = document.getElementById('step2Item');
+        const s3 = document.getElementById('step3Item');
+        const s4 = document.getElementById('step4Item');
+        if (s2) s2.classList.remove('active');
+        if (s3) s3.classList.remove('active');
+        if (s4) s4.classList.remove('active');
 
-        function writeString(offset, str) {
-            for (let i = 0; i < str.length; i++) {
-                view.setUint8(offset + i, str.charCodeAt(i));
-            }
+        const step2Sub = document.getElementById('step2Sub');
+        if (step2Sub) step2Sub.textContent = `❌ ${message}`;
+        const dlPercent = document.getElementById('dlPercentLabel');
+        if (dlPercent) {
+            dlPercent.textContent = 'Restricted';
+            dlPercent.style.color = '#ff5858';
         }
 
-        writeString(0, 'RIFF');
-        view.setUint32(4, 36 + numSamples * 2, true);
-        writeString(8, 'WAVE');
-        writeString(12, 'fmt ');
-        view.setUint32(16, 16, true);
-        view.setUint16(20, 1, true); // PCM
-        view.setUint16(22, 1, true); // Mono
-        view.setUint32(24, sampleRate, true);
-        view.setUint32(28, sampleRate * 2, true);
-        view.setUint16(32, 2, true);
-        view.setUint16(34, 16, true);
-        writeString(36, 'data');
-        view.setUint32(40, numSamples * 2, true);
-
-        for (let i = 0; i < numSamples; i++) {
-            const t = i / sampleRate;
-            const sample = Math.sin(2 * Math.PI * 440 * t) * Math.exp(-t * 2) * 0.3;
-            view.setInt16(44 + i * 2, Math.max(-1, Math.min(1, sample)) * 0x7FFF, true);
+        const saveBtn = document.getElementById('saveFileBtn');
+        if (saveBtn) {
+            saveBtn.textContent = '❌ Download Unavailable';
+            saveBtn.style.background = '#e53e3e';
+            saveBtn.onclick = function() {
+                showToast('Source permits direct in-page streaming. Direct file download not permitted.');
+            };
         }
-        return new Blob([buffer], { type: 'audio/mpeg' });
-    }
 
-    // Client-side background download handler (with mobile storage direct saving)
-    async function runClientBackgroundDownload(videoId, song) {
-        setDownloadStep(1);
-
-        setTimeout(async () => {
-            setDownloadStep(2);
-
-            let pct = 0;
-            if (downloadProgressTimer) clearInterval(downloadProgressTimer);
-
-            downloadProgressTimer = setInterval(async () => {
-                pct += Math.floor(Math.random() * 16) + 14;
-                if (pct > 100) pct = 100;
-
-                document.getElementById('dlProgressFill').style.width = pct + '%';
-                document.getElementById('dlPercentLabel').textContent = pct + '%';
-
-                if (pct >= 100) {
-                    clearInterval(downloadProgressTimer);
-                    downloadProgressTimer = null;
-                    setDownloadStep(3);
-
-                    // Fetch audio or create MP3 audio blob directly in-browser
-                    let audioBlobUrl = null;
-                    const safeTitle = (song.title || 'song').replace(/[<>:"/\\|?*]+/g, '_');
-                    const downloadFileName = `${safeTitle}.mp3`;
-
-                    try {
-                        let directStream = streamCache[song.videoId];
-                        if (!directStream) {
-                            const backendBase = (typeof getBackendBase === 'function') ? getBackendBase() : '';
-                            const stRes = await fetch(`${backendBase}/api/stream`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ url: song.videoId })
-                            }).then(r => r.json());
-                            if (stRes && stRes.stream_url) {
-                                directStream = stRes.stream_url;
-                                streamCache[song.videoId] = directStream;
-                            }
-                        }
-                        if (directStream) {
-                            const audioRes = await fetch(directStream);
-                            if (audioRes.ok) {
-                                const b = await audioRes.blob();
-                                audioBlobUrl = URL.createObjectURL(b);
-                            }
-                        }
-                    } catch(e) {}
-
-                    if (!audioBlobUrl) {
-                        const fallbackBlob = createFallbackAudioBlob(song.title);
-                        audioBlobUrl = URL.createObjectURL(fallbackBlob);
-                    }
-
-                    setTimeout(() => {
-                        setDownloadStep(4);
-                        if (audioBlobUrl) {
-                            currentDownloadedFileUrl = audioBlobUrl;
-                            downloadOnSamePage(audioBlobUrl, downloadFileName);
-                        }
-                        showToast(`🎉 "${song.title}" saved to your device Downloads!`);
-                    }, 600);
-                }
-            }, 250);
-        }, 400);
+        showToast(`⚠️ Download unavailable: ${message}`);
     }
 
     function saveCurrentDownloadDirect() {
@@ -2668,6 +3163,7 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
+        initVolumeControl();
         const input = document.getElementById('searchInput');
         if (input) {
             input.value = '';

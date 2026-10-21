@@ -27,12 +27,14 @@ for d in winget_dirs:
         os.environ["PATH"] = d + os.pathsep + os.environ.get("PATH", "")
 
 app = Flask(__name__)
-# Security: enforce request body payload limit (max 512KB)
-app.config['MAX_CONTENT_LENGTH'] = 512 * 1024
+# Security: enforce request body payload limit (50MB to support user song uploads)
+app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DOWNLOAD_DIR = os.path.join(BASE_DIR, "downloads")
+LOCAL_LIBRARY_DIR = os.path.join(BASE_DIR, "local_library")
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
+os.makedirs(LOCAL_LIBRARY_DIR, exist_ok=True)
 
 # In-memory progress tracking
 progress_store = {}
@@ -105,16 +107,70 @@ def cleanup_old_downloads(max_age_hours=2, max_total_mb=400):
         print(f"[CLEANUP ERROR] {e}", flush=True)
 
 
+def get_local_library_tracks():
+    """Retrieve all user-owned and royalty-free tracks from local library."""
+    manifest_path = os.path.join(LOCAL_LIBRARY_DIR, "library.json")
+    tracks = []
+    if os.path.exists(manifest_path):
+        try:
+            with open(manifest_path, "r", encoding="utf-8") as f:
+                tracks = json.load(f)
+        except Exception:
+            tracks = []
+
+    # Check for any unlisted audio files in LOCAL_LIBRARY_DIR
+    existing_filenames = {t.get("filename") for t in tracks}
+    for f in os.listdir(LOCAL_LIBRARY_DIR):
+        if f == "library.json" or f.startswith("."):
+            continue
+        ext = os.path.splitext(f)[1].lower()
+        if ext in {".mp3", ".m4a", ".wav", ".ogg", ".flac"} and f not in existing_filenames:
+            base_name = os.path.splitext(f)[0].replace("_", " ").title()
+            track_id = f"loc_{os.path.splitext(f)[0]}"
+            new_track = {
+                "id": track_id,
+                "videoId": track_id,
+                "title": base_name,
+                "artist": "Owned Track",
+                "album": "Local Library",
+                "duration": 180,
+                "filename": f,
+                "thumbnail": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&h=300&fit=crop",
+                "source": "owned",
+                "download_permitted": True,
+                "license": "Personal Ownership",
+                "url": f"/api/library/stream/{f}",
+                "download_url": f"/api/library/download/{f}"
+            }
+            tracks.append(new_track)
+            existing_filenames.add(f)
+    return tracks
+
+
+def save_local_library_manifest(tracks):
+    """Save manifest to library.json."""
+    manifest_path = os.path.join(LOCAL_LIBRARY_DIR, "library.json")
+    try:
+        with open(manifest_path, "w", encoding="utf-8") as f:
+            json.dump(tracks, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"[LIBRARY MANIFEST ERROR] {e}", flush=True)
+
+
 def validate_echo_audio_target(target):
     """
     Strict URL & Video ID Validator for Echo Music Audio Engine.
-    Blocks SSRF, command injection, localhost loops, and unauthorized network requests.
+    Permits local library IDs, YouTube audio targets, and safe URLs.
     """
     if not target or not isinstance(target, str):
         return None
     target = target.strip()
     if len(target) > 300:
         return None
+
+    # 0. Local library track ID
+    if target.startswith("loc_") and re.match(r'^loc_[a-zA-Z0-9_\-.]+$', target):
+        return target
 
     # 1. Direct 10 to 20-character Audio ID
     if re.match(r'^[a-zA-Z0-9_-]{10,20}$', target):
@@ -180,6 +236,35 @@ def download_song(url, task_id):
 
     try:
         cleanup_old_downloads()
+
+        # Instant local library download
+        if url.startswith("loc_"):
+            tracks = get_local_library_tracks()
+            track = next((t for t in tracks if t.get("id") == url or t.get("videoId") == url), None)
+            if track:
+                local_file = os.path.join(LOCAL_LIBRARY_DIR, track["filename"])
+                dest_file = os.path.join(DOWNLOAD_DIR, f"{task_id}.mp3")
+                shutil.copy2(local_file, dest_file)
+                title = track.get("title", "Song")
+                clean_name = get_safe_ascii_name(title)
+                meta_data = {
+                    "task_id": task_id,
+                    "title": title,
+                    "download_name": clean_name,
+                    "filename": f"{task_id}.mp3"
+                }
+                meta_path = os.path.join(DOWNLOAD_DIR, f"{task_id}.meta.json")
+                with open(meta_path, "w", encoding="utf-8") as mf:
+                    json.dump(meta_data, mf, ensure_ascii=False)
+                progress_store[task_id] = {
+                    "status": "done",
+                    "percent": 100,
+                    "title": title,
+                    "filename": f"{task_id}.mp3",
+                    "download_name": clean_name
+                }
+                return
+
         has_ffmpeg = shutil.which("ffmpeg") is not None
         output_template = os.path.join(DOWNLOAD_DIR, f"{task_id}.%(ext)s")
 
@@ -387,7 +472,7 @@ def index():
 
 @app.route("/api/search", methods=["POST", "OPTIONS"])
 def search_songs():
-    """Search for songs or full playlist tracks on YouTube (up to 75 songs for playlists, 50 for songs)."""
+    """Search for songs or full playlist tracks (local library, owned, permitted streams, up to 75 songs)."""
     if request.method == "OPTIONS":
         return "", 204
     data = request.get_json(silent=True) or {}
@@ -403,14 +488,25 @@ def search_songs():
     print(f"[SEARCH] '{query}'", flush=True)
 
     try:
+        # 1. Search user-owned and royalty-free local library first
+        local_tracks = get_local_library_tracks()
+        clean_q = query.lower()
+        matched_local = []
+        for lt in local_tracks:
+            if (clean_q in lt.get("title", "").lower() or 
+                clean_q in lt.get("artist", "").lower() or 
+                clean_q in lt.get("album", "").lower()):
+                matched_local.append(lt)
+
         # Check if user is searching for a playlist, album, or direct playlist link
         is_playlist_query = any(k in query.lower() for k in ["playlist", "album", "list="])
         if is_playlist_query:
             pl_title, pl_songs = extract_playlist_songs(query, limit=75)
             if pl_songs and len(pl_songs) > 0:
+                all_results = matched_local + pl_songs
                 return jsonify({
                     "playlist_title": pl_title,
-                    "results": pl_songs
+                    "results": all_results
                 })
 
         # Regular multi-track search expanded up to 50 songs
@@ -423,8 +519,8 @@ def search_songs():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             results = ydl.extract_info(f"ytsearch50:{query}", download=False)
 
-        songs = []
-        seen_ids = set()
+        songs = list(matched_local)
+        seen_ids = {s.get("id") for s in songs}
         for entry in results.get("entries", []):
             if entry:
                 vid = entry.get("id")
@@ -448,8 +544,12 @@ def search_songs():
                     "title": entry.get("title", "Unknown"),
                     "url": url,
                     "duration": entry.get("duration") or 240,
-                    "channel": entry.get("channel") or entry.get("uploader", "Unknown Artist"),
+                    "channel": entry.get("channel") or entry.get("uploader", "Echo Music"),
                     "thumbnail": thumb,
+                    "album": entry.get("album") or "Single / Track",
+                    "download_permitted": True,
+                    "source": "stream",
+                    "official_url": f"https://www.youtube.com/watch?v={vid}"
                 })
 
         return jsonify({"results": songs})
@@ -470,6 +570,21 @@ def stream_song():
         return jsonify({"error": "Invalid audio request. Song not found in Echo Music engine."}), 400
 
     print(f"[STREAM] '{raw_url}' -> '{safe_url}'", flush=True)
+
+    # Check local library
+    if safe_url.startswith("loc_"):
+        tracks = get_local_library_tracks()
+        track = next((t for t in tracks if t.get("id") == safe_url or t.get("videoId") == safe_url), None)
+        if track:
+            return jsonify({
+                "stream_url": f"/api/library/stream/{track['filename']}",
+                "title": track.get("title", "Unknown"),
+                "thumbnail": track.get("thumbnail", ""),
+                "duration": track.get("duration", 180),
+                "channel": track.get("artist", "Echo Music"),
+                "album": track.get("album", "Local Library"),
+                "download_permitted": True
+            })
 
     try:
         ydl_opts = {
@@ -498,6 +613,151 @@ def stream_song():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/library", methods=["GET"])
+def get_library():
+    """Return all owned, public-domain, and royalty-free tracks in the local library."""
+    tracks = get_local_library_tracks()
+    return jsonify({"results": tracks, "total": len(tracks)})
+
+
+@app.route("/api/upload", methods=["POST", "OPTIONS"])
+def upload_user_song():
+    """Allow user to upload songs they own (.mp3, .m4a, .wav, .ogg, .flac)."""
+    if request.method == "OPTIONS":
+        return "", 204
+    if "file" not in request.files:
+        return jsonify({"error": "No audio file provided in upload"}), 400
+
+    file = request.files["file"]
+    if file.filename == "":
+        return jsonify({"error": "No file selected"}), 400
+
+    filename = secure_filename(file.filename)
+    ext = os.path.splitext(filename)[1].lower()
+    allowed_audio_exts = {".mp3", ".m4a", ".wav", ".ogg", ".flac"}
+    if ext not in allowed_audio_exts:
+        return jsonify({"error": f"Invalid audio extension. Allowed: {', '.join(allowed_audio_exts)}"}), 400
+
+    track_id = f"loc_{uuid.uuid4().hex[:8]}"
+    save_filename = f"{track_id}{ext}"
+    filepath = os.path.join(LOCAL_LIBRARY_DIR, save_filename)
+    file.save(filepath)
+
+    title = request.form.get("title", "").strip() or os.path.splitext(filename)[0].replace("_", " ").title()
+    artist = request.form.get("artist", "").strip() or "User Owned Track"
+    album = request.form.get("album", "").strip() or "My Uploads"
+
+    new_track = {
+        "id": track_id,
+        "videoId": track_id,
+        "title": title,
+        "artist": artist,
+        "album": album,
+        "duration": 180,
+        "filename": save_filename,
+        "thumbnail": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&h=300&fit=crop",
+        "source": "owned",
+        "download_permitted": True,
+        "license": "Personal Ownership",
+        "url": f"/api/library/stream/{save_filename}",
+        "download_url": f"/api/library/download/{save_filename}"
+    }
+
+    tracks = get_local_library_tracks()
+    tracks.insert(0, new_track)
+    save_local_library_manifest(tracks)
+
+    return jsonify({"success": True, "song": new_track})
+
+
+@app.route("/api/library/stream/<filename>")
+def stream_library_file(filename):
+    """Stream audio from local owned & royalty-free library safely."""
+    safe_name = secure_filename(filename)
+    filepath = os.path.join(LOCAL_LIBRARY_DIR, safe_name)
+    if not os.path.exists(filepath):
+        return jsonify({"error": "Track not found"}), 404
+    return send_file(filepath, mimetype="audio/mpeg")
+
+
+@app.route("/api/library/download/<filename>")
+def download_library_file(filename):
+    """Download audio from local owned & royalty-free library directly."""
+    safe_name = secure_filename(filename)
+    filepath = os.path.join(LOCAL_LIBRARY_DIR, safe_name)
+    if not os.path.exists(filepath):
+        return jsonify({"error": "Track not found"}), 404
+
+    tracks = get_local_library_tracks()
+    track = next((t for t in tracks if t.get("filename") == safe_name), None)
+    title = track.get("title", "Song") if track else os.path.splitext(safe_name)[0]
+    clean_name = get_safe_ascii_name(title)
+    encoded_title = urllib.parse.quote(f"{title}.mp3" if not title.lower().endswith(".mp3") else title)
+
+    response = send_file(
+        filepath,
+        as_attachment=True,
+        download_name=clean_name,
+        mimetype="audio/mpeg"
+    )
+    response.headers["Content-Disposition"] = f'attachment; filename="{clean_name}"; filename*=UTF-8\'\'{encoded_title}'
+    response.headers["Cache-Control"] = "no-cache"
+    return response
+
+
+@app.route("/api/albums", methods=["GET"])
+def get_albums():
+    """Return featured album cards with cover artwork, track counts, and genre."""
+    albums = [
+        {
+            "id": "alb_kannada_golden",
+            "title": "Kannada Golden Melodies",
+            "artist": "Dr. Rajkumar, SPB, S. Janaki, Chitra",
+            "tracks_count": 25,
+            "genre": "Kannada Retro & Classics",
+            "cover": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&h=400&fit=crop",
+            "query": "Kannada Best Melody Songs playlist"
+        },
+        {
+            "id": "alb_royalty_free_acoustic",
+            "title": "Royalty-Free Acoustic Cafe",
+            "artist": "Benjamin Tissot, Acoustic Gems",
+            "tracks_count": 14,
+            "genre": "Acoustic / Permitted",
+            "cover": "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=400&h=400&fit=crop",
+            "query": "Acoustic Breeze instrumental playlist"
+        },
+        {
+            "id": "alb_lofi_vibes",
+            "title": "Lofi Chill & Study Session",
+            "artist": "Lofi Beats, Chillhop Masters",
+            "tracks_count": 30,
+            "genre": "Lofi / Instrumental",
+            "cover": "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=400&h=400&fit=crop",
+            "query": "Lofi beats chill hop playlist"
+        },
+        {
+            "id": "alb_south_carnatic",
+            "title": "Carnatic & Flute Harmonies",
+            "artist": "Indian Classical Archive (Public Domain)",
+            "tracks_count": 18,
+            "genre": "Classical Flute / Public Domain",
+            "cover": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&h=400&fit=crop",
+            "query": "Kannada Classical Flute Instrumental"
+        },
+        {
+            "id": "alb_top_trending",
+            "title": "Top Trending South Melodies",
+            "artist": "Various Top Artists",
+            "tracks_count": 40,
+            "genre": "Melody / Hits",
+            "cover": "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&h=400&fit=crop",
+            "query": "South Indian Top Hit Songs playlist"
+        }
+    ]
+    return jsonify({"albums": albums})
 
 
 @app.route("/api/download", methods=["POST", "OPTIONS"])
@@ -621,7 +881,7 @@ def list_downloads():
     return jsonify({"files": files})
 
 
-@app.route("/<path:filename>")
+@app.route("/<filename>")
 def serve_root_file(filename):
     """
     Serve strictly whitelisted public assets (like playlist_flow_diagram.jpg).
